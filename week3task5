@@ -1,0 +1,68 @@
+There are balls of different colors (Red, Green, Blue, Pink, and Yellow). Write a program that store the colors in an array as first character (e.g R for Red,Y for yellow ,P for pink ,G for green & B for Blue).User enters the color of the balls exactly 10 times.
+a.	Use Bubble sort to sort the balls according to color.
+b.	Find the occurrence of each color.
+
+Code:
+#include <iostream>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+const int ARRAY_SIZE = 10;
+
+void bubbleSort(string arr[], int size) {
+    for (int i = 0; i < size - 1; i++) {
+        for (int j = 0; j < size - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+            }
+        }
+    }
+}
+
+int main() {
+    string colors[ARRAY_SIZE];
+    
+    // Input colors from the user
+    cout << "Enter the colors of the balls (R for Red, G for Green, B for Blue, P for Pink, Y for Yellow):" << endl;
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        cout << "Enter color " << (i + 1) << ": ";
+        cin >> colors[i];
+    }
+
+    // Sort the colors using Bubble Sort
+    bubbleSort(colors, ARRAY_SIZE);
+
+    // Find and display the occurrence of each color
+    int countRed = 0, countGreen = 0, countBlue = 0, countPink = 0, countYellow = 0;
+    
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        if (colors[i] == "R") {
+            countRed++;
+        } else if (colors[i] == "G") {
+            countGreen++;
+        } else if (colors[i] == "B") {
+            countBlue++;
+        } else if (colors[i] == "P") {
+            countPink++;
+        } else if (colors[i] == "Y") {
+            countYellow++;
+        }
+    }
+
+    cout << "Sorted Colors:" << endl;
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        cout << colors[i] << " ";
+    }
+    cout << endl;
+
+    cout << "Occurrences of each color:" << endl;
+    cout << "Red: " << countRed << " times" << endl;
+    cout << "Green: " << countGreen << " times" << endl;
+    cout << "Blue: " << countBlue << " times" << endl;
+    cout << "Pink: " << countPink << " times" << endl;
+    cout << "Yellow: " << countYellow << " times" << endl;
+
+    return 0;
+}
