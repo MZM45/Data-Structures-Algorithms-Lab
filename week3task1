@@ -1,0 +1,101 @@
+Write a program that implements the following array of 10 characters and print the element in ascending order using 
+a.	Bubble sort
+b.	Selection sort
+c.	Insertion sort
+d	w	a	s	r	g	c	z	u	o
+
+Also print each pass, numbers of passes and number of comparison are required to sort the elements.
+#INCLUDE <IOSTREAM>
+
+USING NAMESPACE STD;
+
+VOID PRINTARRAY(CHAR ARR[], INT SIZE) {
+    FOR (INT I = 0; I < SIZE; I++) {
+        COUT << ARR[I] << " ";
+    }
+    COUT << ENDL;
+}
+
+INT BUBBLESORT(CHAR ARR[], INT SIZE) {
+    INT PASSES = 0;
+    INT COMPARISONS = 0;
+    FOR (INT I = 0; I < SIZE - 1; I++) {
+        BOOL SWAPPED = FALSE;
+        FOR (INT J = 0; J < SIZE - I - 1; J++) {
+            COMPARISONS++;
+            IF (ARR[J] > ARR[J + 1]) {
+                SWAP(ARR[J], ARR[J + 1]);
+                SWAPPED = TRUE;
+            }
+        }
+        PASSES++;
+        COUT << "PASS " << PASSES << ": ";
+        PRINTARRAY(ARR, SIZE);
+        IF (!SWAPPED) {
+            BREAK;
+        }
+    }
+    RETURN COMPARISONS;
+}
+
+INT SELECTIONSORT(CHAR ARR[], INT SIZE) {
+    INT PASSES = 0;
+    INT COMPARISONS = 0;
+    FOR (INT I = 0; I < SIZE - 1; I++) {
+        INT MININDEX = I;
+        FOR (INT J = I + 1; J < SIZE; J++) {
+            COMPARISONS++;
+            IF (ARR[J] < ARR[MININDEX]) {
+                MININDEX = J;
+            }
+        }
+        SWAP(ARR[I], ARR[MININDEX]);
+        PASSES++;
+        COUT << "PASS " << PASSES << ": ";
+        PRINTARRAY(ARR, SIZE);
+    }
+    RETURN COMPARISONS;
+}
+
+INT INSERTIONSORT(CHAR ARR[], INT SIZE) {
+    INT PASSES = 0;
+    INT COMPARISONS = 0;
+    FOR (INT I = 1; I < SIZE; I++) {
+        CHAR KEY = ARR[I];
+        INT J = I - 1;
+        WHILE (J >= 0 && KEY < ARR[J]) {
+            COMPARISONS++;
+            ARR[J + 1] = ARR[J];
+            J--;
+        }
+        ARR[J + 1] = KEY;
+        PASSES++;
+        COUT << "PASS " << PASSES << ": ";
+        PRINTARRAY(ARR, SIZE);
+    }
+    RETURN COMPARISONS;
+}
+
+INT MAIN() {
+    CHAR ARR[] = {'W', 'A', 'S', 'R', 'G', 'C', 'Z', 'U', 'O'};
+    INT SIZE = SIZEOF(ARR) / SIZEOF(ARR[0]);
+
+    COUT << "ORIGINAL ARRAY: ";
+    PRINTARRAY(ARR, SIZE);
+    COUT << ENDL;
+
+    INT BUBBLECOMPARISONS = BUBBLESORT(ARR, SIZE);
+    COUT << "BUBBLE SORT COMPARISONS: " << BUBBLECOMPARISONS << ENDL;
+
+    CHAR ARR2[] = {'W', 'A', 'S', 'R', 'G', 'C', 'Z', 'U', 'O'}; // RESET ARRAY FOR SELECTION SORT
+
+    INT SELECTIONCOMPARISONS = SELECTIONSORT(ARR2, SIZE);
+    COUT << "SELECTION SORT COMPARISONS: " << SELECTIONCOMPARISONS << ENDL;
+
+    CHAR ARR3[] = {'W', 'A', 'S', 'R', 'G', 'C', 'Z', 'U', 'O'}; // RESET ARRAY FOR INSERTION SORT
+
+    INT INSERTIONCOMPARISONS = INSERTIONSORT(ARR3, SIZE);
+    COUT << "INSERTION SORT COMPARISONS: " << INSERTIONCOMPARISONS << ENDL;
+
+    RETURN 0;
+}
