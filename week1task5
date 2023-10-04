@@ -1,0 +1,39 @@
+Write a program that stores the birth year of 20 students in an array.
+a.	Print the position of the youngest student.
+b.	Print the number of students who are 20 years old.
+Code:
+#include <iostream>
+
+using namespace std;
+
+int main() {
+    int birthYears[20] = {
+        2003, 1999, 2002, 2001, 2000, 2005, 2000, 2002, 2004, 2001,
+        2000, 1998, 2003, 2000, 2001, 1999, 2000, 2002, 2001, 2003
+    };
+
+    int youngestYear = birthYears[0];
+    int youngestPosition = 0;
+    for (int i = 1; i < 20; i++) {
+        if (birthYears[i] > youngestYear) {
+            youngestYear = birthYears[i];
+            youngestPosition = i;
+        }
+    }
+
+    cout << "a. Position of the youngest student: " << youngestPosition << endl;
+
+    
+    int students20YearsOld = 0;
+    int currentYear = 2023; 
+
+    for (int i = 0; i < 20; i++) {
+        if (currentYear - birthYears[i] == 20) {
+            students20YearsOld++;
+        }
+    }
+
+    cout << "b. Number of students who are 20 years old: " << students20YearsOld << endl;
+
+    return 0;
+}
