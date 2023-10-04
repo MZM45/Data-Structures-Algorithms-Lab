@@ -1,0 +1,42 @@
+Consider an array that stores the square of 1-25 numbers in unsorted order. Write a program that takes input from user a number and display the location of squared number that stores in an array.
+For example	
+Input: 5
+Output: Location of 25 is 6th index
+Code:
+#include <iostream>
+
+using namespace std;
+
+const int ARRAY_SIZE = 25;
+
+int main() {
+    int squares[ARRAY_SIZE] = {
+        1, 4, 9, 16, 25, 36, 49, 64, 81, 100,
+        121, 144, 169, 196, 225, 256, 289, 324, 361, 400,
+        441, 484, 529, 576, 625
+    };
+
+    int numberToFind;
+
+    // Input the number to search for its square
+    cout << "Enter a number to find its square: ";
+    cin >> numberToFind;
+
+    // Perform a linear search to find the location of the square
+    int location = -1;
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        if (squares[i] == numberToFind) {
+            location = i;
+            break; // Exit the loop when found
+        }
+    }
+
+    // Check if the square was found and display the location
+    if (location != -1) {
+        cout << "Location of " << numberToFind << " is at index " << location << endl;
+    } else {
+        cout << "Square of " << numberToFind << " not found in the array" << endl;
+    }
+
+    return 0;
+}
