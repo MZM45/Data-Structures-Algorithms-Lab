@@ -1,0 +1,35 @@
+Write a program the implements the linear search on array having 15 integers provided by user. Program prints the location of ITEM if found and print message” ITEM not found” in case of match not found.
+Code: #include <iostream>
+
+using namespace std;
+
+const int ARRAY_SIZE = 15;
+
+int linearSearch(int arr[], int size, int item) {
+    for (int i = 0; i < size; i++) {
+        if (arr[i] == item) {
+            return i; 
+        }
+    }
+    return -1;
+}
+
+int main() {
+    int arr[ARRAY_SIZE] = { 10, 25, 32, 48, 56, 72, 88, 93, 101, 117, 132, 147, 161, 176, 192 };
+    int item;
+
+    
+    cout << "Enter the item you want to search for: ";
+    cin >> item;
+
+    int location = linearSearch(arr, ARRAY_SIZE, item);
+
+    if (location != -1) {
+        cout << "Item " << item << " found at index " << location << endl;
+    }
+    else {
+        cout << "Item " << item << " not found" << endl;
+    }
+
+    return 0;
+}
