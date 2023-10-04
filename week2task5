@@ -1,0 +1,72 @@
+Consider alphabetized array “NAME”
+
+Allen	Clark	Dickens	Edwards	Goodman	Hobbs	Irwin
+Klein	Lewis	Morgan	Richards	Scott	Tucker	Walton
+
+a.	Write a program that prints number of comparisons required to locate Hobbs, Morgan and Fisher using linear search.
+b.	Write a program to find the location of “Goodman” using binary search. Also print BEG, END and MID for the test segment in each step of the algorithm and print number of comparisons to find Goodman.
+Code:
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+const int ARRAY_SIZE = 14;
+
+int linearSearchComparisons(const string arr[], const string& target) {
+    int comparisons = 0;
+    for (int i = 0; i < ARRAY_SIZE; i++) {
+        comparisons++;
+        if (arr[i] == target) {
+            return comparisons;
+        }
+    }
+    return comparisons;
+}
+
+int binarySearchComparisons(const string arr[], const string& target) {
+    int comparisons = 0;
+    int left = 0;
+    int right = ARRAY_SIZE - 1;
+    int mid;
+
+    while (left <= right) {
+        comparisons++;
+        mid = left + (right - left) / 2;
+
+        if (arr[mid] == target) {
+            return comparisons;
+        }
+        else if (arr[mid] < target) {
+            left = mid + 1;
+        }
+        else {
+            right = mid - 1;
+        }
+    }
+
+    return comparisons;
+}
+
+int main() {
+    string nameArray[ARRAY_SIZE] = {
+        "Allen", "Clark", "Dickens", "Edwards", "Goodman", "Hobbs", "Irwin",
+        "Klein", "Lewis", "Morgan", "Richards", "Scott", "Tucker", "Walton"
+    };
+
+    string targets[3] = { "Hobbs", "Morgan", "Fisher" };
+
+    cout << "Linear Search Comparisons:" << endl;
+    for (int i = 0; i < 3; i++) {
+        int comparisons = linearSearchComparisons(nameArray, targets[i]);
+        cout << "Comparisons to find " << targets[i] << ": " << comparisons << endl;
+    }
+
+    cout << "\nBinary Search for Goodman:" << endl;
+    string target = "Goodman";
+    int comparisons = binarySearchComparisons(nameArray, target);
+    cout << "Comparisons to find " << target << ": " << comparisons << endl;
+
+    return 0;
+}
+
