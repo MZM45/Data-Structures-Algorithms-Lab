@@ -1,0 +1,56 @@
+Consider the following array that stores the roll # of students in sorted order. Write a program that finds the location of roll # provided by user using binary search. If roll# not found, prints the message” Roll number not found”
+
+100	110	120	122	123	124	125	126	127	128
+129	130	131	132	133	134	135	136	144	149
+
+Code:
+#include <iostream>
+
+using namespace std;
+
+const int ARRAY_SIZE = 20;
+
+int binarySearch(int arr[], int size, int item) {
+    int left = 0;
+    int right = size - 1;
+
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+
+        if (arr[mid] == item) {
+            return mid; 
+        }
+        else if (arr[mid] < item) {
+            left = mid + 1;
+        }
+        else {
+            right = mid - 1;
+        }
+    }
+
+    return -1; 
+}
+
+int main() {
+    int rolls[ARRAY_SIZE] = {
+        100, 110, 120, 122, 123, 124, 125, 126, 127, 128,
+        129, 130, 131, 132, 133, 134, 135, 136, 144, 149
+    };
+
+    int rollToFind;
+
+    cout << "Enter the roll number you want to search for: ";
+    cin >> rollToFind;
+
+    int location = binarySearch(rolls, ARRAY_SIZE, rollToFind);
+
+    
+    if (location != -1) {
+        cout << "Roll number " << rollToFind << " found at index " << location << endl;
+    }
+    else {
+        cout << "Roll number " << rollToFind << " not found" << endl;
+    }
+
+    return 0;
+}
