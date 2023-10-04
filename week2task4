@@ -1,0 +1,44 @@
+Consider the following array “Weight” that stores the weight of boxes in kilograms.
+21.5	15.0	12.5	25.0	17.5	24.0	35.0	40.0	27.5	22.0
+33.0	12.5	23.5	10.25	5.5	45.5	19.25	12.25	32.0	20.0
+
+
+
+a.	Write a program that finds the heaviest weight and print its location.
+b.	Write a program that finds the lightest weight and prints its location
+
+Code:
+#include <iostream>
+
+using namespace std;
+
+const int ARRAY_SIZE = 20;
+
+int main() {
+    double weights[ARRAY_SIZE] = {
+        21.5, 15.0, 12.5, 25.0, 17.5, 24.0, 35.0, 40.0, 27.5, 22.0,
+        33.0, 12.5, 23.5, 10.25, 5.5, 45.5, 19.25, 12.25, 32.0, 20.0
+    };
+
+    double heaviestWeight = weights[0];
+    double lightestWeight = weights[0];
+    int heaviestLocation = 0;
+    int lightestLocation = 0;
+
+    for (int i = 1; i < ARRAY_SIZE; i++) {
+        if (weights[i] > heaviestWeight) {
+            heaviestWeight = weights[i];
+            heaviestLocation = i;
+        }
+        if (weights[i] < lightestWeight) {
+            lightestWeight = weights[i];
+            lightestLocation = i;
+        }
+    }
+
+    
+    cout << "Heaviest Weight: " << heaviestWeight << " at location " << heaviestLocation << endl;
+    cout << "Lightest Weight: " << lightestWeight << " at location " << lightestLocation << endl;
+
+    return 0;
+}
