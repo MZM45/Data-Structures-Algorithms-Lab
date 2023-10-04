@@ -1,0 +1,47 @@
+Write a program that takes the marks out of 50 as input and find the following
+a.	Number of students that score above average.
+b.	Find the lowest marks.
+c.	Find the highest marks.
+Code:
+#include <iostream>
+
+using namespace std;
+
+int main() {
+    int marks[] = { 35, 42, 48, 39, 50, 30, 45, 47, 38, 41 };
+    int numStudents = sizeof(marks) / sizeof(marks[0]);
+
+    int totalMarks = 0;
+    for (int i = 0; i < numStudents; i++) {
+        totalMarks += marks[i];
+    }
+    double averageMarks = static_cast<double>(totalMarks) / numStudents;
+
+    
+    int aboveAverageCount = 0;
+    for (int i = 0; i < numStudents; i++) {
+        if (marks[i] > averageMarks) {
+            aboveAverageCount++;
+        }
+    }
+    int lowestMarks = marks[0];
+    for (int i = 1; i < numStudents; i++) {
+        if (marks[i] < lowestMarks) {
+            lowestMarks = marks[i];
+        }
+    }
+
+    int highestMarks = marks[0];
+    for (int i = 1; i < numStudents; i++) {
+        if (marks[i] > highestMarks) {
+            highestMarks = marks[i];
+        }
+    }
+
+    
+    cout << "a. Number of students that scored above average: " << aboveAverageCount << endl;
+    cout << "b. Lowest marks: " << lowestMarks << " out of 50" << endl;
+    cout << "c. Highest marks: " << highestMarks << " out of 50" << endl;
+
+    return 0;
+}
