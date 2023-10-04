@@ -1,0 +1,56 @@
+Write a program that can store temperature of 30 days in an array and arrange the temperature from highest to lowest temperature using selection sort.
+Also print the highest, lowest recorded and average recorded temperature.
+Code:
+#include <iostream>
+
+using namespace std;
+
+const int NUM_DAYS = 30;
+
+void selectionSort(double arr[], int size) {
+    for (int i = 0; i < size - 1; i++) {
+        int maxIndex = i;
+        for (int j = i + 1; j < size; j++) {
+            if (arr[j] > arr[maxIndex]) {
+                maxIndex = j;
+            }
+        }
+        swap(arr[i], arr[maxIndex]);
+    }
+}
+
+int main() {
+    double temperatures[NUM_DAYS] = {
+        75.5, 80.2, 72.8, 78.6, 81.0, 77.3, 79.9, 76.5, 74.7, 82.4,
+        85.1, 70.5, 73.2, 79.8, 84.3, 76.9, 71.8, 72.4, 83.7, 68.5,
+        67.2, 89.5, 68.8, 74.0, 82.7, 86.2, 75.1, 78.3, 81.5, 70.9
+    };
+
+
+    selectionSort(temperatures, NUM_DAYS);
+
+
+    double highestTemp = temperatures[0];
+    double lowestTemp = temperatures[NUM_DAYS - 1];
+    double sum = 0.0;
+
+    for (int i = 0; i < NUM_DAYS; i++) {
+        sum += temperatures[i];
+    }
+
+
+    double averageTemp = sum / NUM_DAYS;
+
+
+    cout << "Sorted Temperatures (Highest to Lowest):" << endl;
+    for (int i = 0; i < NUM_DAYS; i++) {
+        cout << temperatures[i] << " ";
+    }
+    cout << endl;
+
+    cout << "Highest Recorded Temperature: " << highestTemp << endl;
+    cout << "Lowest Recorded Temperature: " << lowestTemp << endl;
+    cout << "Average Recorded Temperature: " << averageTemp << endl;
+
+    return 0;
+}
