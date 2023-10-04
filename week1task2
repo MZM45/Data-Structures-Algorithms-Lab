@@ -1,0 +1,73 @@
+Write a program that stores the Name of students in an array given as follow.
+a.	Now Input the name and position where new student will be store in an array.
+Sara	Hamza	Musa	Haris	Amna	Mariam	Saad	Sameer	Talha	
+ 
+b.	Delete the name from position input by user
+Code:
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+const int MAX_STUDENTS = 10; 
+
+int main() {
+    string students[MAX_STUDENTS] = { "Sara", "Hamza", "Musa", "Haris", "Amna", "Mariam", "Saad", "Sameer", "Talha" };
+    int currentSize = 9; 
+
+    
+    cout << "Current list of students:" << endl;
+    for (int i = 0; i < currentSize; i++) {
+        cout << students[i] << " ";
+    }
+    cout << endl;
+
+    
+    string newName;
+    int insertPosition;
+
+    cout << "Enter the name of the new student: ";
+    cin >> newName;
+    cout << "Enter the position to insert (0-based index): ";
+    cin >> insertPosition;
+
+    if (insertPosition >= 0 && insertPosition <= currentSize && currentSize < MAX_STUDENTS) {
+        for (int i = currentSize; i > insertPosition; i--) {
+            students[i] = students[i - 1];
+        }
+        students[insertPosition] = newName;
+        currentSize++; 
+    }
+    else {
+        cout << "Invalid insert position or maximum array size exceeded." << endl;
+    }
+
+    
+    cout << "Updated list of students after insertion:" << endl;
+    for (int i = 0; i < currentSize; i++) {
+        cout << students[i] << " ";
+    }
+    cout << endl;
+
+    int deletePosition;
+
+    cout << "Enter the position to delete (0-based index): ";
+    cin >> deletePosition;
+
+    if (deletePosition >= 0 && deletePosition < currentSize) {
+        for (int i = deletePosition; i < currentSize - 1; i++) {
+            students[i] = students[i + 1];
+        }
+        currentSize--; 
+    }
+    else {
+        cout << "Invalid delete position." << endl;
+    }
+    cout << "Updated list of students after deletion:" << endl;
+    for (int i = 0; i < currentSize; i++) {
+        cout << students[i] << " ";
+    }
+    cout << endl;
+
+    return 0;
+}
