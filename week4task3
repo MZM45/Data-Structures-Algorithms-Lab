@@ -1,0 +1,89 @@
+Write programs for following two different algorithms for finding that given number is prime or not. Also determine the time taken by both algorithms
+
+Frist Algorithm 	Second Algorithm
+for i  2 to n-1
+     if i divides n
+         n is not prime number 	for i  2 to √n
+    if i divides n
+        n is not prime number
+.
+Calculate times taken by these programs for given values and conclude which algorithm is better than other 
+i.	n = 11
+ii.	n = 101
+iii.        n=1111
+iv.	n=1000003
+v.	n = 10000000019
+Plot graphs for time of execution vs. “n”, for all the values of n given .Use excel for plotting graph.
+
+
+
+
+CODE#1:
+#INCLUDE <IOSTREAM>
+#INCLUDE <CMATH>
+
+USING NAMESPACE STD;
+
+BOOL ISPRIMEFIRST(INT N, INT& ITERATIONS) {
+    IF (N <= 1) {
+        ITERATIONS = 1;  // WE CONSIDER ONE ITERATION FOR THE BASE CASE.
+        RETURN FALSE;
+    }
+    FOR (INT I = 2; I < N; I++) {
+        ITERATIONS++;
+        IF (N % I == 0) {
+            RETURN FALSE;
+        }
+    }
+    RETURN TRUE;
+}
+
+INT MAIN() {
+    INT VALUES[] = {11, 101, 1111, 1000003, 10000000019};
+    INT N;
+
+    FOR (INT I = 0; I < 5; I++) {
+        N = VALUES[I];
+        INT ITERATIONS = 0;
+        BOOL RESULT = ISPRIMEFIRST(N, ITERATIONS);
+        COUT << "N = " << N << ", FIRST ALGORITHM: " << (RESULT ? "PRIME" : "NOT PRIME") << ", ITERATIONS: " << ITERATIONS << ENDL;
+    }
+
+    RETURN 0;
+}
+
+CODE#2:
+#INCLUDE <IOSTREAM>
+#INCLUDE <CMATH>
+
+USING NAMESPACE STD;
+
+BOOL ISPRIMESECOND(INT N, INT& ITERATIONS) {
+    IF (N <= 1) {
+        ITERATIONS = 1;  // WE CONSIDER ONE ITERATION FOR THE BASE CASE.
+        RETURN FALSE;
+    }
+    INT SQRTN = SQRT(N);
+    FOR (INT I = 2; I <= SQRTN; I++) {
+        ITERATIONS++;
+        IF (N % I == 0) {
+            RETURN FALSE;
+        }
+    }
+    RETURN TRUE;
+}
+
+INT MAIN() {
+    INT VALUES[] = {11, 101, 1111, 1000003, 10000000019};
+    INT N;
+
+    FOR (INT I = 0; I < 5; I++) {
+        N = VALUES[I];
+        INT ITERATIONS = 0;
+        BOOL RESULT = ISPRIMESECOND(N, ITERATIONS);
+        COUT << "N = " << N << ", SECOND ALGORITHM: " << (RESULT ? "PRIME" : "NOT PRIME") << ", ITERATIONS: " << ITERATIONS << ENDL;
+    }
+
+    RETURN 0;
+}
+
