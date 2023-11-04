@@ -1,0 +1,63 @@
+There are five balls of different colors (Red, Green, Blue, Orange, and Yellow) in a jar. Players take the ball from jar for playing. Write a program that maintains the stack of balls and prints the following
+a.	How many balls are left in a jar?
+b.	Colour of ball taken by each player.
+c.	“No ball available” if palyer6 arrives.
+
+Code:
+#include <iostream>
+#include <string>
+
+const int maxBalls = 5;
+std::string jarOfBalls[maxBalls];
+int top = -1;
+
+bool isEmpty() {
+    return top == -1;
+}
+
+bool isFull() {
+    return top == maxBalls - 1;
+}
+
+void push(const std::string& color) {
+    if (isFull()) {
+        std::cout << "Player says: 'No ball available!'" << std::endl;
+    }
+    else {
+        jarOfBalls[++top] = color;
+    }
+}
+
+std::string pop() {
+    if (isEmpty()) {
+        return "";
+    }
+    else {
+        return jarOfBalls[top--];
+    }
+}
+
+int main() {
+    std::string colors[] = { "Red", "Green", "Blue", "Orange", "Yellow" };
+
+    std::cout << "Initial number of balls in the jar: " << maxBalls << std::endl;
+
+    for (int player = 1; player <= 6; player++) {
+        if (!isEmpty()) {
+            std::string ballColor = pop();
+            if (ballColor != "") {
+                std::cout << "Player " << player << " takes a " << ballColor << " ball." << std::endl;
+            }
+            else {
+                std::cout << "Player " << player << " says: 'No ball available!'" << std::endl;
+            }
+        }
+        else {
+            std::cout << "Player " << player << " says: 'No ball available!'" << std::endl;
+        }
+    }
+
+    std::cout << "Remaining number of balls in the jar: " << maxBalls - top - 1 << std::endl;
+
+    return 0;
+}
