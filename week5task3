@@ -1,0 +1,85 @@
+Write a program that evaluates the postfix expression using stack.
+
+
+Code:
+#include <iostream>
+
+const int maxStack = 100;
+int stack[maxStack];
+int top = -1;
+
+void push(int value) {
+    if (top == maxStack - 1) {
+        std::cerr << "Error: Stack is full." << std::endl;
+        exit(1);
+    }
+    stack[++top] = value;
+}
+
+int pop() {
+    if (top == -1) {
+        std::cerr << "Error: Stack is empty." << std::endl;
+        exit(1);
+    }
+    return stack[top--];
+}
+
+bool isEmpty() {
+    return top == -1;
+}
+
+bool isOperator(char c) {
+    return (c == '+' || c == '-' || c == '*' || c == '/');
+}
+
+int performOperation(char operation, int operand1, int operand2) {
+    switch (operation) {
+    case '+':
+        return operand1 + operand2;
+    case '-':
+        return operand1 - operand2;
+    case '*':
+        return operand1 * operand2;
+    case '/':
+        if (operand2 != 0) {
+            return operand1 / operand2;
+        }
+        else {
+            std::cerr << "Error: Division by zero!" << std::endl;
+            exit(1);
+        }
+    default:
+        return 0;
+    }
+}
+
+int evaluatePostfixExpression(const char* expression) {
+    int i = 0;
+    while (expression[i] != '\0') {
+        if (isdigit(expression[i])) {
+            push(expression[i] - '0');
+        }
+        else if (isOperator(expression[i])) {
+            int operand2 = pop();
+            int operand1 = pop();
+            int result = performOperation(expression[i], operand1, operand2);
+            push(result);
+        }
+        i++;
+    }
+
+    if (isEmpty()) {
+        std::cerr << "Error: Invalid postfix expression." << std::endl;
+        exit(1);
+    }
+
+    return pop();
+}
+
+int main() {
+    const char* postfixExpression = "42*3+";
+    int result = evaluatePostfixExpression(postfixExpression);
+    std::cout << "Result of the postfix expression: " << result << std::endl;
+
+    return 0;
+}
