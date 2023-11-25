@@ -1,0 +1,278 @@
+Write a menu driven program that implements double link list have following.
+a.	Insert an element at beginning.
+b.	Insert an elemt at the end of the link list.
+c.	Insert an element at position provided by user.
+d.	Traverse the list in backward and forward directions.
+e.	Delete an elment from beginning.
+f.	Delete an elment from end.
+g.	Delete an elment from position provided by user.
+Code:
+#include<iostream>
+
+using namespace std;
+
+
+struct Node {
+    int data;
+    Node* prev;
+    Node* next;
+};
+
+
+class DoublyLinkedList {
+private:
+    Node* head;
+
+public:
+    DoublyLinkedList() {
+        head = nullptr;
+    }
+
+    void insertAtBeginning(int value) {
+        Node* newNode = new Node;
+        newNode->data = value;
+        newNode->prev = nullptr;
+        newNode->next = head;
+
+        if (head != nullptr) {
+            head->prev = newNode;
+        }
+
+        head = newNode;
+    }
+
+   
+    void insertAtEnd(int value) {
+        Node* newNode = new Node;
+        newNode->data = value;
+        newNode->next = nullptr;
+
+        if (head == nullptr) {
+            newNode->prev = nullptr;
+            head = newNode;
+            return;
+        }
+
+        Node* last = head;
+        while (last->next != nullptr) {
+            last = last->next;
+        }
+
+        last->next = newNode;
+        newNode->prev = last;
+    }
+
+    
+    void insertAtPosition(int value, int position) {
+        Node* newNode = new Node;
+        newNode->data = value;
+
+        if (position == 1) {
+            newNode->prev = nullptr;
+            newNode->next = head;
+
+            if (head != nullptr) {
+                head->prev = newNode;
+            }
+
+            head = newNode;
+            return;
+        }
+
+        Node* temp = head;
+        for (int i = 1; i < position - 1 && temp != nullptr; ++i) {
+            temp = temp->next;
+        }
+
+        if (temp == nullptr) {
+            cout << "Invalid position.\n";
+            return;
+        }
+
+        newNode->prev = temp;
+        newNode->next = temp->next;
+
+        if (temp->next != nullptr) {
+            temp->next->prev = newNode;
+        }
+
+        temp->next = newNode;
+    }
+
+  
+    void traverseForward() {
+        Node* current = head;
+
+        while (current != nullptr) {
+            cout << current->data << " ";
+            current = current->next;
+        }
+
+        cout << endl;
+    }
+
+ 
+    void traverseBackward() {
+        Node* last = head;
+
+        while (last->next != nullptr) {
+            last = last->next;
+        }
+
+        while (last != nullptr) {
+            cout << last->data << " ";
+            last = last->prev;
+        }
+
+        cout << endl;
+    }
+
+    
+    void deleteFromBeginning() {
+        if (head == nullptr) {
+            cout << "List is empty. Cannot delete from the beginning.\n";
+            return;
+        }
+
+        Node* temp = head;
+        head = head->next;
+
+        if (head != nullptr) {
+            head->prev = nullptr;
+        }
+
+        delete temp;
+    }
+
+  
+    void deleteFromEnd() {
+        if (head == nullptr) {
+            cout << "List is empty. Cannot delete from the end.\n";
+            return;
+        }
+
+        Node* last = head;
+        while (last->next != nullptr) {
+            last = last->next;
+        }
+
+        if (last->prev != nullptr) {
+            last->prev->next = nullptr;
+        } else {
+            head = nullptr;
+        }
+
+        delete last;
+    }
+
+    
+    void deleteFromPosition(int position) {
+        if (head == nullptr) {
+            cout << "List is empty. Cannot delete from the specified position.\n";
+            return;
+        }
+
+        Node* temp = head;
+
+        for (int i = 1; i < position && temp != nullptr; ++i) {
+            temp = temp->next;
+        }
+
+        if (temp == nullptr) {
+            cout << "Invalid position.\n";
+            return;
+        }
+
+        if (temp->prev != nullptr) {
+            temp->prev->next = temp->next;
+        } else {
+            head = temp->next;
+        }
+
+        if (temp->next != nullptr) {
+            temp->next->prev = temp->prev;
+        }
+
+        delete temp;
+    }
+};
+
+int main() {
+    DoublyLinkedList dll;
+    int choice, value, position;
+
+    do {
+        cout << "\nDoubly Linked List Menu\n";
+        cout << "1. Insert at the beginning\n";
+        cout << "2. Insert at the end\n";
+        cout << "3. Insert at a specific position\n";
+        cout << "4. Traverse forward\n";
+        cout << "5. Traverse backward\n";
+        cout << "6. Delete from the beginning\n";
+        cout << "7. Delete from the end\n";
+        cout << "8. Delete from a specific position\n";
+        cout << "9. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            cout << "Enter value to be inserted: ";
+            cin >> value;
+            dll.insertAtBeginning(value);
+            break;
+
+        case 2:
+            cout << "Enter value to be inserted: ";
+            cin >> value;
+            dll.insertAtEnd(value);
+            break;
+
+        case 3:
+            cout << "Enter value to be inserted: ";
+            cin >> value;
+            cout << "Enter position: ";
+            cin >> position;
+            dll.insertAtPosition(value, position);
+            break;
+
+        case 4:
+            cout << "Doubly Linked List (Forward): ";
+            dll.traverseForward();
+            break;
+
+        case 5:
+            cout << "Doubly Linked List (Backward): ";
+            dll.traverseBackward();
+            break;
+
+        case 6:
+            dll.deleteFromBeginning();
+            cout << "Element deleted from the beginning.\n";
+            break;
+
+        case 7:
+            dll.deleteFromEnd();
+            cout << "Element deleted from the end.\n";
+            break;
+
+        case 8:
+            cout << "Enter position: ";
+            cin >> position;
+            dll.deleteFromPosition(position);
+            cout << "Element deleted from position " << position << ".\n";
+            break;
+
+        case 9:
+            cout << "Exiting the program.\n";
+            break;
+
+        default:
+            cout << "Invalid choice. Please enter a valid option.\n";
+        }
+
+    } while (choice != 9);
+
+    return 0;
+}
+
