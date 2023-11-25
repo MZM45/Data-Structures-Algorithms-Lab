@@ -1,0 +1,97 @@
+Write a program to implement QUEUE having following functions with max_size=6.
+enQueue()
+deQueue()
+Display()
+
+Test the program using the following procedures
+Call enQueue(10)
+Call enQueue(7)
+Call enQueue(4)
+Call enQueue(8)
+Call enQueue(2)
+Call enQueue(15)
+Call Display ()
+Call enQueue(25)
+Call deQueue ()
+Call deQueue()
+Call Display ()
+
+Code: #include <iostream>
+using namespace std;
+const int max_size = 6;
+int queue[max_size];
+int front = -1;
+int rear = -1;
+
+
+bool isFull() {
+    return rear == max_size - 1;
+}
+
+
+bool isEmpty() {
+    return rear == -1;
+}
+
+void enQueue(int value) {
+    if (isFull()) {
+        cout << "Queue is full. Cannot enqueue." <<endl;
+    } else {
+        if (isEmpty()) {
+            front = 0;
+        }
+        rear++;
+        queue[rear] = value;
+    }
+}
+
+
+void deQueue() {
+    if (isEmpty()) {
+        cout << "Queue is empty. Cannot dequeue." <<endl;
+    } else {
+        int removedValue = queue[front];
+        if (front == rear) {
+            front = rear = -1; 
+        } else {
+            front++;
+        }
+    }
+}
+
+
+void display() {
+    if (isEmpty()) {
+        cout << "Queue is empty." <<endl;
+    } else {
+       cout << "Queue elements: ";
+        for (int i = front; i <= rear; i++) {
+            cout << queue[i] << " ";
+        }
+        cout <<endl;
+    }
+}
+
+void main() {
+  
+    enQueue(10);
+    enQueue(7);
+    enQueue(4);
+    enQueue(8);
+    enQueue(2);
+    enQueue(15);
+
+    cout << "After enQueue(10), enQueue(7), enQueue(4), enQueue(8), enQueue(2), enQueue(15):" << endl;
+    display();
+	cout << "After enQueue(25), deQueue(), deQueue():" <<endl;
+    enQueue(25);
+    deQueue();
+    deQueue();
+
+   
+    display();
+
+  
+	system("pause");
+}
+
