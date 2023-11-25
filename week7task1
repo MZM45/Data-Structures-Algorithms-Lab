@@ -1,0 +1,230 @@
+Write a menu driven program that implements single link list (The list should be Dynamic and should stop only when the user wishes to end the creation of the list).Implement the functions as follow.
+
+a.	Insert an element at beginning
+b.	Insert an elemt at the end of the link list
+c.	Insert an element at position provided by user
+d.	Traverse the list
+e.	Delete an elment from beginning
+f.	Delete an elment from end
+g.	Delete an elment from position provided by user.
+Code:
+#include <iostream>
+using namespace std;
+
+
+struct Node {
+    int data;
+    Node* next;
+};
+
+
+void insertAtBeginning(Node*& head, int data) {
+    Node* newNode = new Node;
+    newNode->data = data;
+    newNode->next = head;
+    head = newNode;
+}
+
+
+void insertAtEnd(Node*& head, int data) {
+    Node* newNode = new Node;
+    newNode->data = data;
+    newNode->next = nullptr;
+
+    if (!head) {
+        head = newNode;
+        return;
+    }
+
+    Node* current = head;
+    while (current->next) {
+        current = current->next;
+    }
+
+    current->next = newNode;
+}
+
+void insertAtPosition(Node*& head, int data, int position) {
+    if (position < 1) {
+        cout << "Invalid position. Position should be 1 or greater." << endl;
+        return;
+    }
+
+    if (position == 1 || !head) {
+        insertAtBeginning(head, data);
+        return;
+    }
+
+    Node* newNode = new Node;
+    newNode->data = data;
+
+    Node* current = head;
+    for (int i = 1; i < position - 1; i++) {
+        if (current->next) {
+            current = current->next;
+        } else {
+            cout << "Position exceeds the length of the list." << endl;
+            delete newNode;
+            return;
+        }
+    }
+
+    newNode->next = current->next;
+    current->next = newNode;
+}
+
+
+void traverseList(Node* head) {
+    Node* current = head;
+    while (current) {
+        cout << current->data << " -> ";
+        current = current->next;
+    }
+    cout << "nullptr" << endl;
+}
+
+
+void deleteFromBeginning(Node*& head) {
+    if (!head) {
+        cout << "The list is already empty." << endl;
+        return;
+    }
+
+    Node* newHead = head->next;
+    delete head;
+    head = newHead;
+}
+
+
+void deleteFromEnd(Node*& head) {
+    if (!head) {
+        cout << "The list is already empty." << endl;
+        return;
+    }
+
+    if (!head->next) {
+        delete head;
+        head = nullptr;
+        return;
+    }
+
+    Node* current = head;
+    while (current->next->next) {
+        current = current->next;
+    }
+
+    delete current->next;
+    current->next = nullptr;
+}
+
+void deleteFromPosition(Node*& head, int position) {
+    if (position < 1 || !head) {
+        cout << "Invalid position or the list is empty." << endl;
+        return;
+    }
+
+    if (position == 1) {
+        Node* newHead = head->next;
+        delete head;
+        head = newHead;
+        return;
+    }
+
+    Node* current = head;
+    for (int i = 1; i < position - 1; i++) {
+        if (current->next) {
+            current = current->next;
+        } else {
+            cout << "Position exceeds the length of the list." << endl;
+            return;
+        }
+    }
+
+    if (!current->next) {
+        cout << "Position exceeds the length of the list." << endl;
+        return;
+    }
+
+    Node* temp = current->next;
+    current->next = current->next->next;
+    delete temp;
+}
+
+
+void displayList(Node* head) {
+    if (!head) {
+        cout << "The list is empty." << endl;
+    } else {
+        cout << "Linked List: ";
+        traverseList(head);
+    }
+}
+
+int main() {
+    Node* head = nullptr;
+    char choice;
+    int data, position;
+
+    do {
+        cout << "Menu:\n";
+        cout << "a. Insert an element at the beginning\n";
+        cout << "b. Insert an element at the end\n";
+        cout << "c. Insert an element at a specific position\n";
+        cout << "d. Display the list\n"; 
+        cout << "e. Delete an element from the beginning\n";
+        cout << "f. Delete an element from the end\n";
+        cout << "g. Delete an element from a specific position\n";
+        cout << "x. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 'a':
+                cout << "Enter the element to insert at the beginning: ";
+                cin >> data;
+                insertAtBeginning(head, data);
+                break;
+            case 'b':
+                cout << "Enter the element to insert at the end: ";
+                cin >> data;
+                insertAtEnd(head, data);
+                break;
+            case 'c':
+                cout << "Enter the element to insert: ";
+                cin >> data;
+                cout << "Enter the position to insert at: ";
+                cin >> position;
+                insertAtPosition(head, data, position);
+                break;
+            case 'd':
+                displayList(head);  // Display the list
+                break;
+            case 'e':
+                deleteFromBeginning(head);
+                break;
+            case 'f':
+                deleteFromEnd(head);
+                break;
+            case 'g':
+                cout << "Enter the position to delete from: ";
+                cin >> position;
+                deleteFromPosition(head, position);
+                break;
+            case 'x':
+                cout << "Exiting the program." << endl;
+                break;
+            default:
+                cout << "Invalid choice. Please try again." << endl;
+        }
+    } while (choice != 'x');
+
+    // Free memory by deleting all remaining nodes
+    while (head) {
+        Node* temp = head;
+        head = head->next;
+        delete temp;
+    }
+
+    return 0;
+}
+
