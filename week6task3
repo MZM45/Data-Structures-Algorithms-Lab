@@ -1,0 +1,139 @@
+There are 15 cars waiting in queue to refill the fuel at automated petrol pump station. You have some specific information about each car such as car number which is unique for each car, car model, and the amount of fuel which each car required to refill. You need to implement a system which takes 15 cars as enqueue in a queue and dequeue cars after they have done with the refill.
+1.	Add a car in the queue.
+2.	Display all cars in the queue
+3.	Count the total number of cars after dequeue.
+4.	Dequeue a car after it is done with the refill.
+Code:
+#include <iostream>
+#include <string>
+using namespace std;
+const int max_size = 15; 
+
+struct Car {
+    int carNumber;
+    string carModel;
+    double fuelAmount;
+};
+
+Car carQueue[max_size];
+int front = -1;
+int rear = -1;
+
+
+bool isEmpty() {
+    return front == -1;
+}
+
+
+bool isFull() {
+    return (front == 0 && rear == max_size - 1) || (rear == (front - 1) % (max_size - 1));
+}
+
+void enqueueCar(const Car& car) {
+    if (isFull()) {
+        cout << "Queue is full. Cannot add more cars." << endl;
+    } else {
+        if (front == -1) {
+            front = rear = 0;
+        } else {
+            rear = (rear + 1) % max_size;
+        }
+        carQueue[rear] = car;
+        cout << "Car " << car.carNumber << " added to the queue." << endl;
+    }
+}
+
+Car dequeueCar() {
+    Car emptyCar;
+    emptyCar.carNumber = -1;
+    if (isEmpty()) {
+        cout << "Queue is empty. No cars to dequeue." << endl;
+        return emptyCar;
+    } else {
+        Car car = carQueue[front];
+        if (front == rear) {
+            front = rear = -1;
+        } else {
+            front = (front + 1) % max_size;
+        }
+        return car;
+    }
+}
+
+
+void displayCars() {
+    if (isEmpty()) {
+        cout << "Queue is empty. No cars to display." << endl;
+    } else {
+        int i = front;
+        cout << "Cars in the queue:\n";
+        while (true) {
+            cout << "Car Number: " << carQueue[i].carNumber << ", Car Model: " << carQueue[i].carModel << ", Fuel Amount: " << carQueue[i].fuelAmount << endl;
+            if (i == rear)
+                break;
+            i = (i + 1) % max_size;
+        }
+    }
+}
+
+void main() {
+    int choice;
+    int carCount = 1; 
+
+    do {
+        cout << "\nMenu:\n";
+        cout << "1. Add a car to the queue\n";
+        cout << "2. Display all cars in the queue\n";
+        cout << "3. Count the total number of cars in the queue\n";
+        cout << "4. Dequeue a car\n";
+        cout << "5. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                if (carCount <= 15) {
+                    Car newCar;
+                    newCar.carNumber = carCount;
+                    cout << "Enter Car Model: ";
+                    cin >> newCar.carModel;
+                    cout << "Enter Fuel Amount: ";
+                    cin >> newCar.fuelAmount;
+                    enqueueCar(newCar);
+                    carCount++;
+                } else {
+                    cout << "Maximum car limit reached. Cannot add more cars." << endl;
+                }
+                break;
+            case 2:
+                displayCars();
+                break;
+            case 3:
+                if (isEmpty()) {
+                    cout << "Total number of cars in the queue: 0" << endl;
+                } else {
+                    int totalCars = (rear - front + max_size) % max_size + 1;
+                    cout << "Total number of cars in the queue: " << totalCars << endl;
+                }
+                break;
+            case 4:
+                {
+                    Car car = dequeueCar();
+                    if (car.carNumber != -1) {
+                        cout << "Car " << car.carNumber << " dequeued (refill completed)." << endl;
+                    }
+                }
+                break;
+            case 5:
+                cout << "Exiting the program." << endl;
+                break;
+            default:
+                cout << "Invalid choice. Please try again." << endl;
+                break;
+        }
+    } while (choice != 5);
+
+   system("pause");
+}
+
+
