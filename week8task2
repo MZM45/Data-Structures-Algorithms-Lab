@@ -1,0 +1,204 @@
+Sara is fond of music and used to listen music in her spare time. She keeps the collection of music albums. She wants to maintain a new play list of her favorite songs name”My hit collection”. She keeps the Song Id, name of song, singer name, and year of song as song record.
+Write a program that implements the above scenario using double link list by considering the following.
+a.	A new song will be added at the end of the list.
+b.	A list can be played in forward and backward direction.
+c.	A play list can be played in circular fashion.
+d.	A song can be searched by year.
+e.	A song can be deleted from beginning.
+
+Code:
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+
+struct Song {
+    int songId;
+    string songName;
+    string singerName;
+    int year;
+    Song* prev;
+    Song* next;
+};
+
+
+class Playlist {
+private:
+    Song* head;
+
+public:
+    Playlist() {
+        head = nullptr;
+    }
+
+    void addSong(int id, const string& name, const string& singer, int year) {
+        Song* newSong = new Song;
+        newSong->songId = id;
+        newSong->songName = name;
+        newSong->singerName = singer;
+        newSong->year = year;
+        newSong->next = nullptr;
+
+        if (head == nullptr) {
+            newSong->prev = nullptr;
+            head = newSong;
+        } else {
+            Song* last = head;
+            while (last->next != nullptr) {
+                last = last->next;
+            }
+            last->next = newSong;
+            newSong->prev = last;
+        }
+    }
+
+    void playForward() {
+        Song* current = head;
+
+        while (current != nullptr) {
+            cout << "ID: " << current->songId << " | Name: " << current->songName
+                 << " | Singer: " << current->singerName << " | Year: " << current->year << endl;
+            current = current->next;
+        }
+    }
+
+   
+    void playBackward() {
+        Song* last = head;
+
+        while (last->next != nullptr) {
+            last = last->next;
+        }
+
+        while (last != nullptr) {
+            cout << "ID: " << last->songId << " | Name: " << last->songName
+                 << " | Singer: " << last->singerName << " | Year: " << last->year << endl;
+            last = last->prev;
+        }
+    }
+
+ 
+    void playCircular() {
+        Song* current = head;
+
+        while (current != nullptr) {
+            cout << "ID: " << current->songId << " | Name: " << current->songName
+                 << " | Singer: " << current->singerName << " | Year: " << current->year << endl;
+            current = current->next;
+
+            
+            if (current == nullptr && head != nullptr) {
+                current = head;
+            }
+        }
+    }
+
+
+    void searchByYear(int targetYear) {
+        Song* current = head;
+        bool found = false;
+
+        while (current != nullptr) {
+            if (current->year == targetYear) {
+                cout << "Song found with Year " << targetYear << ":\n";
+                cout << "ID: " << current->songId << " | Name: " << current->songName
+                     << " | Singer: " << current->singerName << " | Year: " << current->year << endl;
+                found = true;
+            }
+            current = current->next;
+        }
+
+        if (!found) {
+            cout << "No song found with Year " << targetYear << endl;
+        }
+    }
+
+   
+    void deleteFromBeginning() {
+        if (head == nullptr) {
+            cout << "Playlist is empty. Cannot delete from the beginning.\n";
+            return;
+        }
+
+        Song* temp = head;
+        head = head->next;
+
+        if (head != nullptr) {
+            head->prev = nullptr;
+        }
+
+        delete temp;
+        cout << "Song deleted from the beginning.\n";
+    }
+};
+
+int main() {
+    Playlist myPlaylist;
+    int choice, id, year;
+    string name, singer;
+
+    do {
+        cout << "\nMy Hit Collection Playlist Menu\n";
+        cout << "1. Add a new song\n";
+        cout << "2. Play playlist in forward direction\n";
+        cout << "3. Play playlist in backward direction\n";
+        cout << "4. Play playlist in circular fashion\n";
+        cout << "5. Search for a song by year\n";
+        cout << "6. Delete a song from the beginning\n";
+        cout << "7. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+        case 1:
+            cout << "Enter Song ID: ";
+            cin >> id;
+            cout << "Enter Song Name: ";
+            cin.ignore();  
+            getline(cin, name);
+            cout << "Enter Singer Name: ";
+            getline(cin, singer);
+            cout << "Enter Year: ";
+            cin >> year;
+            myPlaylist.addSong(id, name, singer, year);
+            break;
+
+        case 2:
+            cout << "Playing Playlist in Forward Direction:\n";
+            myPlaylist.playForward();
+            break;
+
+        case 3:
+            cout << "Playing Playlist in Backward Direction:\n";
+            myPlaylist.playBackward();
+            break;
+
+        case 4:
+            cout << "Playing Playlist in Circular Fashion:\n";
+            myPlaylist.playCircular();
+            break;
+
+        case 5:
+            cout << "Enter the year to search: ";
+            cin >> year;
+            myPlaylist.searchByYear(year);
+            break;
+
+        case 6:
+            myPlaylist.deleteFromBeginning();
+            break;
+
+        case 7:
+            cout << "Exiting the program.\n";
+            break;
+
+        default:
+            cout << "Invalid choice. Please enter a valid option.\n";
+        }
+
+    } while (choice != 7);
+
+    return 0;
+}
+
