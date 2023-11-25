@@ -1,0 +1,89 @@
+Write a program that stores the web page numbers in double link list. Insert each page number at the end of the list. Display the web pages as forward and backward both. After displaying the last page, the first page will be displayed.
+
+
+
+Code:
+#include <iostream>
+
+using namespace std;
+
+
+struct WebPage {
+    int pageNumber;
+    WebPage* prev;
+    WebPage* next;
+};
+
+class WebPageList {
+private:
+    WebPage* head;
+
+public:
+    WebPageList() {
+        head = nullptr;
+    }
+
+
+    void insertPage(int page) {
+        WebPage* newPage = new WebPage;
+        newPage->pageNumber = page;
+        newPage->next = nullptr;
+
+        if (head == nullptr) {
+            newPage->prev = nullptr;
+            head = newPage;
+        } else {
+            WebPage* last = head;
+            while (last->next != nullptr) {
+                last = last->next;
+            }
+            last->next = newPage;
+            newPage->prev = last;
+        }
+    }
+
+
+    void displayForward() {
+        WebPage* current = head;
+
+        while (current != nullptr) {
+            cout << "Web Page Number: " << current->pageNumber << endl;
+            current = current->next;
+        }
+    }
+
+
+    void displayBackward() {
+        WebPage* last = head;
+
+        while (last->next != nullptr) {
+            last = last->next;
+        }
+
+        while (last != nullptr) {
+            cout << "Web Page Number: " << last->pageNumber << endl;
+            last = last->prev;
+        }
+    }
+};
+
+int main() {
+    WebPageList webPages;
+
+
+    webPages.insertPage(1);
+    webPages.insertPage(2);
+    webPages.insertPage(3);
+
+
+    cout << "Displaying Web Pages in Forward Direction:\n";
+    webPages.displayForward();
+
+    cout << "\nDisplaying Web Pages in Backward Direction (circular):\n";
+    webPages.displayBackward();
+	cin.get();
+    return 0;
+}
+
+
+
