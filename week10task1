@@ -1,0 +1,32 @@
+Write a program that inserts the following keys in a Binary Search Tree.
+{70,50,40, 60, 75,42,55,71,32,30,80,35,64,89,77}
+void Inorder(Node* root) {
+    if (root != nullptr) {
+        Inorder(root->left);
+        setConsoleColor(10); // Green color
+        cout << root->key << " ";
+        resetConsoleColor();
+        Inorder(root->right);
+    }
+}
+int keys[] = {70, 50, 40, 60, 75, 42, 55, 71, 32, 30, 80, 35, 64, 89, 77};
+    int numKeys = sizeof(keys) / sizeof(keys[0]);
+
+    for (int i = 0; i < numKeys; ++i) {
+        setConsoleColor(9); // Blue color
+        cout << "Keys inserted are:" << keys[i] << endl;
+        resetConsoleColor();
+    }
+
+    Node* root = nullptr;
+
+    for (int i = 0; i < numKeys; ++i) {
+        root = insert(root, keys[i]);
+    }
+    setConsoleColor(4); // Red Color
+    cout << "Inorder Traversal of the BST: ";
+    inorderTraversal(root);
+    resetConsoleColor();
+    cout << endl;
+	setConsoleColor(12);
+}
