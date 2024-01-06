@@ -1,0 +1,61 @@
+Write a program to find out index for the key value given in task 1 and handle the collision by using function Quadratic probing( ).
+
+Code:
+#include <iostream>
+const int TABLE_SIZE = 30;
+int hashFunction(int key) {
+    return key % TABLE_SIZE;
+}
+int quadraticProbing(int hash, int i) {
+    return (hash + i * i) % TABLE_SIZE;
+}
+struct KeyValuePair {
+    int key;
+    int value;
+};
+class HashTable {
+public:
+    HashTable() {
+        for (int i = 0; i < TABLE_SIZE; ++i) {
+            table[i].key = -1;
+            table[i].value = -1;
+        }
+    }
+    void insert(int key, int value) {
+        int hash = hashFunction(key);
+        int index = hash;
+        int i = 1;
+        while (table[index].key != -1) {
+            index = quadraticProbing(hash, i);
+            ++i;
+        }
+        table[index].key = key;
+        table[index].value = value;
+    }
+    void display() {
+        for (int i = 0; i < TABLE_SIZE; ++i) {
+            if (table[i].key != -1) {
+                std::cout << "Index " << i << ": (" << table[i].key << ", " << table[i].value << ")\n";
+            } else {
+                std::cout << "Index " << i << ": (Empty)\n";
+            }
+        }
+    }
+
+private:
+    KeyValuePair table[TABLE_SIZE];
+};
+
+int main() {
+    int keys[] = {3, 1, 63, 5, 11, 15, 18, 16, 46};
+    int values[] = {21, 72, 36, 30, 44, 33, 12, 80, 99};
+    int numPairs = sizeof(keys) / sizeof(keys[0]);
+    HashTable hashTable;
+    for (int i = 0; i < numPairs; ++i) {
+        hashTable.insert(keys[i], values[i]);
+    }
+    hashTable.display();
+    system("pause");
+    return 0;
+}
+
