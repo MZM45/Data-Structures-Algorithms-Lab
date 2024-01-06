@@ -1,0 +1,108 @@
+Write a program to design a system for storing students records keyed using last three digits of enrollment numbers and the size of hash table must be a prime number
+Your program should have following functions 
+•	HashTable( ) : This function is used  to create a new hash table.
+
+•	Delete( ): This function is used to delete enrollment number from the hash table.
+
+•	Get( ): This function is used to search enrollment number inside the hash table.
+
+•	Put( ): This function is used  to insert enrollment number inside the hash table.
+
+Code:
+#include <iostream>
+#include <cmath>
+
+const int TABLE_SIZE = 13;
+using namespace std;
+
+struct Student {
+    int enrollmentNumber;
+
+
+    Student() : enrollmentNumber(-1) {}
+};
+
+struct HashTable {
+    Student table[TABLE_SIZE];
+
+
+    int hash(int enrollmentNumber) {
+        return enrollmentNumber % TABLE_SIZE;
+    }
+
+
+    void put(int enrollmentNumber) {
+        int index = hash(enrollmentNumber);
+
+        while (table[index].enrollmentNumber != -1) {
+            index = (index + 1) % TABLE_SIZE;
+        }
+
+        table[index].enrollmentNumber = enrollmentNumber;
+    }
+
+
+    bool get(int enrollmentNumber) {
+        int index = hash(enrollmentNumber);
+
+        while (table[index].enrollmentNumber != -1) {
+            if (table[index].enrollmentNumber == enrollmentNumber) {
+                return true;
+            }
+
+            index = (index + 1) % TABLE_SIZE;
+        }
+
+        return false; }
+
+
+    void remove(int enrollmentNumber) {
+        int index = hash(enrollmentNumber);
+
+        while (table[index].enrollmentNumber != -1) {
+            if (table[index].enrollmentNumber == enrollmentNumber) {
+                cout << "Deleted enrollment number: " << enrollmentNumber << endl;
+                table[index].enrollmentNumber = -1;
+                return;
+            }
+
+            index = (index + 1) % TABLE_SIZE;
+        }
+
+        cout << "Enrollment number " << enrollmentNumber << " not found for deletion." << endl;
+    }
+};
+
+int main() {
+    HashTable hashTable;
+    int enrollmentNumbers[] = {123, 456, 789, 321, 654, 987};
+
+
+    for (int i = 0; i < sizeof(enrollmentNumbers) / sizeof(enrollmentNumbers[0]); ++i) {
+        hashTable.put(enrollmentNumbers[i]);
+    }
+
+    for (int i = 0; i < sizeof(enrollmentNumbers) / sizeof(enrollmentNumbers[0]); ++i) {
+        if (hashTable.get(enrollmentNumbers[i])) {
+            cout << "Enrollment number " << enrollmentNumbers[i] << " found." << endl;
+        } else {
+            cout << "Enrollment number " << enrollmentNumbers[i] << " not found." << endl;
+        }
+    }
+
+    hashTable.remove(456);
+    hashTable.remove(789);
+
+
+    cout << "Final Hash Table:" << endl;
+    for (int i = 0; i < TABLE_SIZE; ++i) {
+        cout << "Index " << i << ": ";
+        if (hashTable.table[i].enrollmentNumber != -1) {
+            cout << "Enrollment number: " << hashTable.table[i].enrollmentNumber;
+        }
+        cout << endl;
+    }
+system("pause");
+    return 0;
+}
+
