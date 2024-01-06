@@ -1,0 +1,69 @@
+a.	Write a program to create a Graph for following undirected graph with five vertices with the help of Adjacency List Representation. 
+ 
+b.	Apply Breadth First Search Algorithm for graph given in task 1a. 
+ 
+  
+Code: #include <iostream>
+#include <vector>
+#include <queue>
+#include <set>
+
+using namespace std;
+
+const int MAX_NODES = 5;
+
+void addEdge(vector<int> adjList[MAX_NODES], int u, int v) {
+    adjList[u].push_back(v);
+    adjList[v].push_back(u);
+}
+
+void printGraph(const vector<int> adjList[MAX_NODES]) {
+    for (int i = 0; i < MAX_NODES; ++i) {
+        cout << "Adjacency list of vertex " << i + 1 << ": ";
+        for (size_t j = 0; j < adjList[i].size(); ++j) {
+            cout << adjList[i][j] + 1 << " ";
+        }
+        cout << endl;
+    }
+}
+
+void bfs(const vector<int> adjList[MAX_NODES], int start, set<int>& visited) {
+    queue<int> q;
+    q.push(start);
+    visited.insert(start);
+
+    while (!q.empty()) {
+        int current = q.front();
+        q.pop();
+
+        cout << current + 1 << " "; 
+
+        for (size_t j = 0; j < adjList[current].size(); ++j) {
+            int neighbor = adjList[current][j];
+            if (visited.find(neighbor) == visited.end()) {
+                q.push(neighbor);
+                visited.insert(neighbor);
+            }
+        }
+    }
+}
+
+int main() {
+    
+    vector<int> adjList[MAX_NODES];
+    addEdge(adjList, 0, 1);
+    addEdge(adjList, 0, 3);
+    addEdge(adjList, 1, 3);
+    addEdge(adjList, 1, 2);
+    addEdge(adjList, 1, 4);
+    addEdge(adjList, 2, 4);
+    addEdge(adjList, 3, 4);
+    cout << "Graph created with Adjacency List Representation:" << endl;
+    printGraph(adjList);
+    set<int> visited;
+    cout << "\nBFS starting from node 1:" << endl;
+    bfs(adjList, 0, visited);
+    system("pause");
+    return 0;
+}
+
