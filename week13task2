@@ -1,0 +1,96 @@
+THE BELOW CODE IS NOT ACCURATE AND MAY HAVE SOME ISSUES
+
+Consider the following social network of seven friends where vertices are representing the friends and edges are representing the connections.
+
+ 
+
+a.	Write a program that implements the above graph using adjacency list.
+b.	Display all connections by applying BFS.
+c.	Display all friends that are directly connected.
+
+Code:
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <set>
+using namespace std;
+
+const int MAX_NODES = 7;
+
+void addEdge(vector<int> adjList[MAX_NODES], int u, int v);
+
+void printGraph(const vector<int> adjList[MAX_NODES], const string names[MAX_NODES]);
+
+void bfs(const vector<int> adjList[MAX_NODES], int start, set<int>& visited, const string names[MAX_NODES]);
+
+int main() {
+	vector<int> adjList[MAX_NODES];
+
+	string names[MAX_NODES] = { "Sara", "Zahid", "Zara", "Hamid", "Umer", "Sabib", "Tariq" };
+
+	// Add edges based on the described connections
+	addEdge(adjList, 0, 2); // Sara is connected to Zara
+	addEdge(adjList, 0, 1); // Sara is connected to Zahid
+	addEdge(adjList, 0, 5); // Sara is connected to Sabib
+	addEdge(adjList, 2, 1); // Zara is connected to Zahid
+	addEdge(adjList, 2, 0); // Zara is connected to Sara
+	addEdge(adjList, 2, 3); // Zara is connected to Hamid
+	addEdge(adjList, 1, 5); // Zahid is connected to Sabib
+	addEdge(adjList, 1, 0); // Zahid is connected to Sara
+	addEdge(adjList, 3, 5); // Hamid is connected to Sabib
+	addEdge(adjList, 3, 2); // Hamid is connected to Zara
+	addEdge(adjList, 3, 4); // Hamid is connected to Umer
+	addEdge(adjList, 5, 0); // Sabib is connected to Sara
+	addEdge(adjList, 5, 1); // Sabib is connected to Zahid
+	addEdge(adjList, 5, 4); // Sabib is connected to Umer
+	addEdge(adjList, 4, 3); // Umer is connected to Hamid
+	addEdge(adjList, 4, 6); // Umer is connected to Tariq
+	addEdge(adjList, 6, 4); // Tariq is connected to Umer
+	addEdge(adjList, 6, 3); // Tariq is connected to Hamid
+
+	cout << "Graph created with Adjacency List Representation:" << endl;
+	printGraph(adjList, names);
+
+	set<int> visited;
+
+	cout << "\nBFS starting from Sara (Node 0):" << endl;
+	bfs(adjList, 0, visited, names);
+
+	return 0;
+}
+
+void addEdge(vector<int> adjList[MAX_NODES], int u, int v) {
+	adjList[u].push_back(v);
+	adjList[v].push_back(u);
+}
+
+void printGraph(const vector<int> adjList[MAX_NODES], const string names[MAX_NODES]) {
+	for (int i = 0; i < MAX_NODES; ++i) {
+		cout << "Adjacency list of " << names[i] << ": ";
+		for (size_t j = 0; j < adjList[i].size(); ++j) {
+			cout << names[adjList[i][j]] << " ";
+		}
+		cout << endl;
+	}
+}
+
+void bfs(const vector<int> adjList[MAX_NODES], int start, set<int>& visited, const string names[MAX_NODES]) {
+	queue<int> q;
+	q.push(start);
+	visited.insert(start);
+
+	while (!q.empty()) {
+		int current = q.front();
+		q.pop();
+
+		cout << names[current] << " ";
+
+		for (size_t j = 0; j < adjList[current].size(); ++j) {
+			int neighbor = adjList[current][j];
+			if (visited.find(neighbor) == visited.end()) {
+				q.push(neighbor);
+				visited.insert(neighbor);
+			}
+		}
+	}
+}
