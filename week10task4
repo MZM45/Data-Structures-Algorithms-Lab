@@ -1,0 +1,26 @@
+Consider exercise 1. Add the following functions. Search the value entered by user. If the value is found in binary search tree, a message “found “will be displayed. In case of not found, a message “not found will be displayed".
+bool searchValue(Node* root, int key) {
+    if (root == nullptr) {
+        return false;
+    }
+
+    if (key == root->key) {
+        return true;
+    } else if (key < root->key) {
+        return searchValue(root->left, key);
+    } else {
+        return searchValue(root->right, key);
+    }
+}
+int searchValueInput;
+	 setConsoleColor(10);
+    cout << "Enter a value to search in the BST: ";
+    cin >> searchValueInput;
+
+    if (searchValue(root, searchValueInput)) {
+        setConsoleColor(14); // Yellow color
+        cout << "Found" << endl;
+    } else {
+        setConsoleColor(12); // Red color
+        cout << "Not Found" << endl;
+    }
