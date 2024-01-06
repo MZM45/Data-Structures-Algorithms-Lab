@@ -1,0 +1,71 @@
+Write a program to store data in hash table of size 30 . Find out the index for each value if the index is full then look for the next slot index using linear probing concept.(i.e (hash(n) + 1) % T), (hash(n) + 2) % T (hash(n) + 3) % T). where hash(n) is the index computed using a hash function and T is the table size)
+The items are already sorted in a key-value pair format. The values given are:
+{ (3,21) (1,72) (63,36) (5,30) (11,44) (15,33) (18,12) (16,80) (46,99). }	
+
+Code:
+#include<iostream>
+using namespace std;
+
+const int table_size = 30;
+int hashfunction(int key) {
+    return key % table_size;
+}
+
+int linearprobing(int hash, int i) {
+    return (hash + i) % table_size;
+}
+
+struct keyvaluepair {
+    int key;
+    int value;
+};
+
+class hashtable {
+public:
+    hashtable() {
+        
+        for (int i = 0; i < table_size; ++i) {
+            table[i].key = -1;
+            table[i].value = -1;
+        }
+    }
+
+    
+    void insert(int key, int value) {
+        int hash = hashfunction(key);
+        int index = hash;
+
+        int i = 1;
+        while (table[index].key != -1) {
+            index = linearprobing(hash, i);
+            ++i;
+        }
+        table[index].key = key;
+        table[index].value = value;
+    }
+
+    void display() {
+        for (int i = 0; i < table_size; ++i) {
+            if (table[i].key != -1) {
+                std::cout << "index " << i << ": (" << table[i].key << ", " << table[i].value << ")\n";
+            }
+        }
+    }
+
+private:
+    keyvaluepair table[table_size];
+};
+
+int main() {
+    int keys[] = {3, 1, 63, 5, 11, 15, 18, 16, 46};
+    int values[] = {21, 72, 36, 30, 44, 33, 12, 80, 99};
+    int numpairs = sizeof(keys) / sizeof(keys[0]);
+
+    hashtable hashtable;
+    for (int i = 0; i < numpairs; ++i) {
+        hashtable.insert(keys[i], values[i]);
+    }
+    hashtable.display();
+	system("pause");
+    return 0;
+}
