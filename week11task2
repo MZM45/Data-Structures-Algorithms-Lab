@@ -1,0 +1,106 @@
+There are different patients of different age group visit to Dr. ABC for treatment. They are waiting in a queue in FIFO fashion. Dr. ABC attends the patient to facilitate them in following order.
+Emergency patient visit first then old age patient, then children, then new patients, then regular patients.
+Priorities are given as
+1.	Emergency patient
+2.	Old age patients
+3.	Children
+4.	New patient
+5.	Regular Patients.
+
+Code:
+#include <iostream>
+#include <string>
+using namespace std;
+
+
+struct Patient {
+    string name;
+    int age;
+    string type;
+    Patient* next;
+
+    
+    Patient(string name, int age, string type) : name(name), age(age), type(type), next(nullptr) {}
+};
+
+class PriorityQueue {
+private:
+    Patient* front;
+
+public:
+    PriorityQueue() : front(nullptr) {}
+
+
+    void Enqueue(string name, int age, string type);
+
+
+    void Dequeue();
+
+
+    void Display();
+};
+
+void PriorityQueue::Enqueue(string name, int age, string type) {
+    Patient* newPatient = new Patient(name, age, type);
+
+    if (!front || type == "Emergency" || type == "OldAge") {
+    
+        newPatient->next = front;
+        front = newPatient;
+    }
+    else {
+
+        Patient* current = front;
+        while (current->next && (current->next->type == "Emergency" || current->next->type == "OldAge" ||
+            current->next->type == "Children")) {
+            current = current->next;
+        }
+        newPatient->next = current->next;
+        current->next = newPatient;
+    }
+
+    cout << "Patient " << name << " added to the queue.\n";
+}
+
+void PriorityQueue::Dequeue() {
+    if (!front) {
+        cout << "Queue is empty.\n";
+        return;
+    }
+
+    Patient* removedPatient = front;
+    front = front->next;
+    cout << "Patient " << removedPatient->name << " attended.\n";
+    delete removedPatient;
+}
+
+void PriorityQueue::Display() {
+    if (!front) {
+        cout << "Queue is empty.\n";
+        return;
+    }
+
+    Patient* current = front;
+    cout << "Patients in the queue:\n";
+    while (current) {
+        cout << "Name: " << current->name << ", Age: " << current->age << ", Type: " << current->type << "\n";
+        current = current->next;
+    }
+}
+
+int main() {
+    PriorityQueue patientQueue;
+    patientQueue.Enqueue("Zain", 25, "Regular");
+    patientQueue.Enqueue("Aaqib", 65, "OldAge");
+    patientQueue.Enqueue("Uzair", 8, "Children");
+    patientQueue.Enqueue("Bilal", 35, "New");
+    patientQueue.Enqueue("Ali", 40, "Emergency");
+    patientQueue.Display();
+    patientQueue.Dequeue();
+    patientQueue.Dequeue();
+    patientQueue.Dequeue();
+    patientQueue.Dequeue();
+    patientQueue.Dequeue();
+    patientQueue.Display();
+    return 0;
+}
