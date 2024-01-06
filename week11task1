@@ -1,0 +1,113 @@
+Write a program that buid the max heap for following values.
+   [2 8 6 1 10 15 3 12 11]
+The program should have following functions.
+a.	Max_Heapify()---- that builds the max heap;
+b.	Build_Heap----calls the max_heapify in Build_Heap() function that starts from n/2
+c.	Get_Max()----It finds the maximum element from max heap;
+d.	Extract_Max();----It deletes the maximum element
+e.	Display();---- Display the elements of Heap;
+Code:
+#include <iostream>
+using namespace std;
+class MaxHeap {
+private:
+    int* heap;
+    int capacity;
+    int size;
+
+public:
+    MaxHeap(int capacity);
+    void Max_Heapify(int i);
+    void Build_Heap(int arr[], int n);
+    int Get_Max();
+    int Extract_Max();
+    void Display();
+};
+
+MaxHeap::MaxHeap(int capacity) {
+    this->capacity = capacity;
+    this->size = 0;
+    this->heap = new int[capacity];
+}
+
+void MaxHeap::Max_Heapify(int i) {
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+    int largest = i;
+
+    if (left < size && heap[left] > heap[largest])
+        largest = left;
+
+    if (right < size && heap[right] > heap[largest])
+        largest = right;
+
+    if (largest != i) {
+        swap(heap[i], heap[largest]);
+        Max_Heapify(largest);
+    }
+}
+
+void MaxHeap::Build_Heap(int arr[], int n) {
+    size = n;
+    for (int i = n / 2 - 1; i >= 0; i--) {
+        Max_Heapify(i);
+    }
+
+ 
+    for (int i = 0; i < n; i++) {
+        heap[i] = arr[i];
+    }
+}
+
+int MaxHeap::Get_Max() {
+    if (size > 0) {
+        return heap[0];
+    }
+    else {
+        cerr << "Heap is empty.\n";
+        return -1;
+    }
+}
+
+int MaxHeap::Extract_Max() {
+    if (size <= 0) {
+        cerr << "Heap is empty.\n";
+        return -1;
+    }
+
+    int max_value = heap[0];
+    heap[0] = heap[size - 1];
+    size--;
+    Max_Heapify(0);
+
+    return max_value;
+}
+
+void MaxHeap::Display() {
+    cout << "Heap elements: ";
+    for (int i = 0; i < size; i++) {
+        cout << heap[i] << " ";
+    }
+    cout << "\n";
+}
+
+int main() {
+    int arr[] = { 2, 8, 6, 1, 10, 15, 3, 12, 11 };
+    int n = sizeof(arr) / sizeof(arr[0]);
+
+    MaxHeap maxHeap(n);
+    maxHeap.Build_Heap(arr, n);
+
+    maxHeap.Display();
+
+    cout << "Max element: " << maxHeap.Get_Max() << "\n";
+
+    int extractedMax = maxHeap.Extract_Max();
+    if (extractedMax != -1) {
+        cout << "Extracted max element: " << extractedMax << "\n";
+    }
+
+    maxHeap.Display();
+
+    return 0;
+}
