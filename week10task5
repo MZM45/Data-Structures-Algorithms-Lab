@@ -1,0 +1,574 @@
+Write a program that inserts the following marks of 15 students in a binary search tree in a way those who scores above average will be organized in right side and those who scores less than average will be stored in left side of the binary search tree. Average score of the students is 13.6
+10.5	14.5	9.0	12.0	14.0	16.0	8.0	10.0	11.5	13.0	15.0	18.0	17.5	19.0	17.0
+
+a. Display marks in sorted order
+b. Display number of students that scores above average.
+c. Display number of students that scores below average.
+
+Add the following functions in above scenario.
+
+d. Display the highest marks.
+e. Display the lowest marks.
+f. Search the marks provided by user.
+g. Delete the marks provided by user.
+
+#include <iostream>
+
+using namespace std;
+
+
+
+class BSTNode {
+
+public:
+
+float data;
+
+BSTNode* left;
+
+BSTNode* right;
+
+
+
+BSTNode(float value) : data(value), left(NULL), right(NULL) {}
+
+};
+
+
+
+class BST {
+
+private:
+
+BSTNode* root;
+
+
+
+public:
+
+BST() : root(NULL) {}
+
+
+
+BSTNode* insert(BSTNode* root, float value) {
+
+if (root == NULL) {
+
+return new BSTNode(value);
+
+}
+
+
+
+if (value > root->data) {
+
+root->right = insert(root->right, value);
+
+} else if (value < root->data) {
+
+root->left = insert(root->left, value);
+
+}
+
+
+
+return root;
+
+}
+
+
+
+void insert(float value) {
+
+root = insert(root, value);
+
+}
+
+
+
+void printInOrder(BSTNode* node) {
+
+if (node == NULL) {
+
+return;
+
+}
+
+
+
+printInOrder(node->left);
+
+cout << node->data << " ";
+
+printInOrder(node->right);
+
+}
+
+
+
+void traverseAndPrint(char orderType) {
+
+switch (orderType) {
+
+case 'a':
+
+printInOrder(root);
+
+break;
+
+default:
+
+cout << "Invalid traversal type\n";
+
+}
+
+cout << endl;
+
+}
+
+
+
+void deleteValue(float value) {
+
+root = deleteNode(root, value);
+
+}
+
+
+
+int countAboveAverage(BSTNode* node, float average) {
+
+if (node == NULL) {
+
+return 0;
+
+}
+
+
+
+int count = 0;
+
+
+
+if (node->data > average) {
+
+count = 1;
+
+}
+
+
+
+count += countAboveAverage(node->left, average);
+
+count += countAboveAverage(node->right, average);
+
+
+
+return count;
+
+}
+
+
+
+int countBelowAverage(BSTNode* node, float average) {
+
+if (node == NULL) {
+
+return 0;
+
+}
+
+
+
+int count = 0;
+
+
+
+if (node->data < average) {
+
+count = 1;
+
+}
+
+
+
+count += countBelowAverage(node->left, average);
+
+count += countBelowAverage(node->right, average);
+
+
+
+return count;
+
+}
+
+
+
+void displayAboveAverage() {
+
+float sum = 0;
+
+int count = 0;
+
+
+
+calculateSumAndCount(root, sum, count);
+
+
+
+float average = sum / count;
+
+
+
+cout << "Marks above average: ";
+
+cout << countAboveAverage(root, average) << endl;
+
+}
+
+
+
+void displayBelowAverage() {
+
+float sum = 0;
+
+int count = 0;
+
+
+
+calculateSumAndCount(root, sum, count);
+
+
+
+float average = sum / count;
+
+
+
+cout << "Marks below average: ";
+
+cout << countBelowAverage(root, average) << endl;
+
+}
+
+
+
+void calculateSumAndCount(BSTNode* node, float& sum, int& count) {
+
+if (node == NULL) {
+
+return;
+
+}
+
+
+
+sum += node->data;
+
+count++;
+
+
+
+calculateSumAndCount(node->left, sum, count);
+
+calculateSumAndCount(node->right, sum, count);
+
+}
+
+
+
+float findHighestMarks(BSTNode* node) {
+
+if (node == NULL) {
+
+return -1;
+
+}
+
+
+
+if (node->right == NULL) {
+
+return node->data;
+
+}
+
+
+
+return findHighestMarks(node->right);
+
+}
+
+
+
+float findLowestMarks(BSTNode* node) {
+
+if (node == NULL) {
+
+return -1;
+
+}
+
+
+
+if (node->left == NULL) {
+
+return node->data;
+
+}
+
+
+
+return findLowestMarks(node->left);
+
+}
+
+
+
+void displayHighestMarks() {
+
+float highestMarks = findHighestMarks(root);
+
+
+
+if (highestMarks == -1) {
+
+cout << "No marks found\n";
+
+} else {
+
+cout << "Highest Marks: " << highestMarks << endl;
+
+}
+
+}
+
+
+
+void displayLowestMarks() {
+
+float lowestMarks = findLowestMarks(root);
+
+
+
+if (lowestMarks == -1) {
+
+cout << "No marks found\n";
+
+} else {
+
+cout << "Lowest Marks: " << lowestMarks << endl;
+
+}
+
+}
+
+
+
+bool search(BSTNode* root, float value) {
+
+if (root == NULL) {
+
+return false;
+
+}
+
+
+
+if (root->data == value) {
+
+return true;
+
+} else if (value < root->data) {
+
+return search(root->left, value);
+
+} else {
+
+return search(root->right, value);
+
+}
+
+}
+
+
+
+void searchValue(float value) {
+
+if (search(root, value)) {
+
+cout << "Found\n";
+
+} else {
+
+cout << "Not Found\n";
+
+}
+
+}
+
+
+
+BSTNode* deleteNode(BSTNode* root, float k) {
+
+if (root == NULL) {
+
+return root;
+
+}
+
+
+
+if (k < root->data) {
+
+root->left = deleteNode(root->left, k);
+
+} else if (k > root->data) {
+
+root->right = deleteNode(root->right, k);
+
+} else {
+
+if (root->left == NULL) {
+
+BSTNode* temp = root->right;
+
+delete root;
+
+return temp;
+
+} else if (root->right == NULL) {
+
+BSTNode* temp = root->left;
+
+delete root;
+
+return temp;
+
+}
+
+
+
+BSTNode* succParent = root;
+
+BSTNode* succ = root->right;
+
+while (succ->left != NULL) {
+
+succParent = succ;
+
+succ = succ->left;
+
+}
+
+
+
+if (succParent != root) {
+
+succParent->left = succ->right;
+
+} else {
+
+succParent->right = succ->right;
+
+}
+
+
+
+root->data = succ->data;
+
+delete succ;
+
+}
+
+return root;
+
+}
+
+};
+
+
+
+int main() {
+
+BST bst;
+
+
+
+float marks[] = {10.5, 14.5, 9.0, 12.0, 14.0, 16.0, 8.0, 10.0, 11.5, 13.0, 15.0, 18.0, 17.5, 19.0, 17.0};
+
+int numMarks = sizeof(marks) / sizeof(marks[0]);
+
+
+
+float average = 13.6;
+
+
+
+for (int i = 0; i < numMarks; ++i) {
+
+bst.insert(marks[i]);
+
+}
+
+
+
+cout << "a. Display marks in sorted order: ";
+
+bst.traverseAndPrint('a');
+
+
+
+cout << "b. Display number of students that scores above average: ";
+
+bst.displayAboveAverage();
+
+
+
+cout << "c. Display number of students that scores below average: ";
+
+bst.displayBelowAverage();
+
+
+
+cout << "d. Display the highest marks: ";
+
+bst.displayHighestMarks();
+
+
+
+cout << "e. Display the lowest marks: ";
+
+bst.displayLowestMarks();
+
+
+
+float searchValue;
+
+cout << "f. Enter marks to search: ";
+
+cin >> searchValue;
+
+bst.searchValue(searchValue);
+
+
+
+float deleteValue;
+
+cout << "g. Enter marks to delete: ";
+
+cin >> deleteValue;
+
+bst.deleteValue(deleteValue);
+
+
+
+cout << "Tree after deletion: ";
+
+bst.traverseAndPrint('a');
+
+
+system("pause");
+
+return 0;
+
+}
