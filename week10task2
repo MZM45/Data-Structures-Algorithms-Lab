@@ -1,0 +1,44 @@
+Add following functions in Exercise1 to traverse the tree created in exercise 1.
+a.	Preorder(root)
+b.	Inorder(root)
+c.	Postorder(root)
+
+
+void inorderTraversal(Node* root) {
+    if (root != nullptr) {
+        inorderTraversal(root->left);
+        setConsoleColor(10);
+        cout << root->key << " ";
+        resetConsoleColor();
+        inorderTraversal(root->right);
+    }
+}
+void Preorder(Node* root) {
+    if (root != nullptr) {
+        setConsoleColor(14); // Yellow color
+        cout << root->key << " ";
+        resetConsoleColor();
+        Preorder(root->left);
+        Preorder(root->right);
+    }
+}
+
+void Inorder(Node* root) {
+    if (root != nullptr) {
+        Inorder(root->left);
+        setConsoleColor(10); // Green color
+        cout << root->key << " ";
+        resetConsoleColor();
+        Inorder(root->right);
+    }
+}
+
+void Postorder(Node* root) {
+    if (root != nullptr) {
+        Postorder(root->left);
+        Postorder(root->right);
+        setConsoleColor(12); // Red color
+        cout << root->key << " ";
+        resetConsoleColor();
+    }
+}
