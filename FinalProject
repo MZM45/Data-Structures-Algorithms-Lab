@@ -1,0 +1,1368 @@
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <string>
+#include <windows.h>
+#include <unordered_map>
+#include <numeric> 
+#include <sstream>
+#include <vector> 
+using namespace std;
+void updateFile();
+void updateFilefemale();
+void updateFileChildrens();
+string filename = "userorder.txt";
+void displayFileContents(const string& filename)
+{
+    ifstream inputFile(filename);
+    if (!inputFile.is_open()) {
+        cerr << "Error opening the file." << endl;
+        return;
+    }
+    string line;
+    while (getline(inputFile, line)) {
+        cout << line << endl;
+    }
+    inputFile.close();
+
+}
+struct Clothing
+{
+    string clothID;
+    string clothType;
+    string clothMaterial;
+    string color;
+    string size;
+    int price;
+    int stock;
+};
+const int TABLE_SIZE = 100;
+struct Node
+{
+    string key;
+    Clothing value;
+    Node* next;
+    Node(const string& k, const Clothing& v) : key(k), value(v), next(nullptr) {}
+};
+struct CartNode {
+
+    Clothing item;
+    int quantity;
+    CartNode* next;
+    CartNode(const Clothing& cloth, int qty) : item(cloth), quantity(qty), next(nullptr) {}
+
+};
+struct Order {
+    int orderId;
+    int productId;
+    string clothType;
+    string material;
+    string size;
+    int price;
+    int quantity;
+    int totalBill;
+};
+class HashMap {
+public:
+    Node* table[TABLE_SIZE];
+    int hashFunction(const string& key) {
+        int hashValue = 0;
+        for (char c : key)
+        {
+            hashValue += c;
+        }
+        return hashValue % TABLE_SIZE;
+    }
+public:
+    HashMap() {
+        for (int i = 0; i < TABLE_SIZE; ++i) {
+            table[i] = nullptr;
+        }
+    }
+    void insert(const string& key, const Clothing& value) {
+        int index = hashFunction(key);
+        Node* newNode = new Node(key, value);
+
+        if (table[index] == nullptr) {
+            table[index] = newNode;
+        }
+        else {
+            Node* current = table[index];
+            while (current->next != nullptr) {
+                current = current->next;
+            }
+            current->next = newNode;
+        }
+    }
+
+    bool find(const string& key, Clothing& value) {
+        int index = hashFunction(key);
+
+        Node* current = table[index];
+        while (current != nullptr) {
+            if (current->key == key) {
+                value = current->value;
+                return true;
+            }
+            current = current->next;
+        }
+
+        return false;
+    }
+    bool remove(const string& key) {
+        int index = hashFunction(key);
+
+        Node* current = table[index];
+        Node* prev = nullptr;
+
+        while (current != nullptr) {
+            if (current->key == key) {
+                if (prev != nullptr) {
+                    prev->next = current->next;
+                }
+                else {
+                    table[index] = current->next;
+                }
+                delete current;
+                return true;
+            }
+            prev = current;
+            current = current->next;
+        }
+        return false;
+    }
+    ~HashMap() {
+        for (int i = 0; i < TABLE_SIZE; ++i) {
+            Node* current = table[i];
+            while (current != nullptr) {
+                Node* temp = current;
+                current = current->next;
+                delete temp;
+            }
+        }
+    }
+};
+HashMap clothingStoreHashMap;
+HashMap clothingStoreHashMapFemale;
+HashMap clothingStoreHashMapChildrens;
+
+class ShoppingCart {
+private:
+    static int orderCounter;
+    double totalBill;
+    unordered_map<string, pair<Clothing, int>> cart;
+public:
+    int orderId;
+    CartNode* cartHead;
+
+    ShoppingCart() : orderId(0), cartHead(nullptr), totalBill(0.0) {}
+
+    int getLastOrderID() {
+        // Specify the file name
+        string fileName = "userorder.txt";
+
+        // Open the file
+        ifstream file(fileName);
+
+        // Check if the file is open
+        if (!file.is_open()) {
+            cerr << "Unable to open the file." << endl;
+            return -1; // Return -1 to indicate an error
+        }
+
+        // Read lines and find the last Order ID
+        string line;
+        int lastOrderID = -1;
+        while (getline(file, line)) {
+            if (line.find("Order ID:") != string::npos) {
+                istringstream iss(line);
+                string word;
+                while (iss >> word) {
+                    if (isdigit(word[0])) {
+                        lastOrderID = stoi(word);
+                    }
+                }
+            }
+        }
+
+        // Close the file
+        file.close();
+
+        return lastOrderID;
+    }
+
+    void updateSalesRecord() {
+        int lastOrderID = getLastOrderID();
+        // Increment the order ID for the new order
+        int orderId = lastOrderID + 1;
+        ofstream salesRecord("userorder.txt", ios::app);
+
+        if (!salesRecord.is_open()) {
+            cerr << "Error opening the file userorder.txt for writing" << endl;
+            return;
+        }
+
+        // Write the order details to the file
+
+        salesRecord << "| Cloth ID   |   Cloth Type   |    Price    |    Quantity  |        Material       |       Color         |       Size           |" << endl;
+        salesRecord << "|------------|----------------|-------------|--------------|-----------------------|---------------------|----------------------|" << endl;
+
+        double totalBill = 0;
+
+        for (const auto& item : cart) {
+            const Clothing& cloth = item.second.first;
+            int quantity = item.second.second;
+
+            salesRecord << "| " << setw(8) << left << cloth.clothID
+                << "   | " << setw(15) << left << cloth.clothType
+                << "| " << setw(6) << right << fixed << setprecision(2) << cloth.price
+                << "      | " << setw(5) << right << quantity
+                << "        | " << setw(21) << left << cloth.clothMaterial
+                << " | " << setw(19) << left << cloth.color
+                << " | " << setw(21) << left << cloth.size << "|" << endl;
+
+            totalBill += cloth.price * quantity;
+        }
+
+        salesRecord << "Total Bill: " << totalBill << endl;
+        salesRecord << "==================================================================================================================================" << endl;
+        salesRecord << "Order ID: " << orderId << endl;
+        salesRecord.close();
+        orderCounter = orderId;
+    }
+
+    void addToCart() {
+        string clothID;
+        int quantity;
+        cout << "Enter the Cloth ID to add to cart: ";
+        cin >> clothID;
+        Clothing cloth;
+        if (clothingStoreHashMap.find(clothID, cloth)) {
+            // Ask for additional details
+            string size, material, color;
+            cout << "Enter the size: ";
+            cin >> size;
+            cout << "Enter the material: ";
+            cin >> material;
+            cout << "Enter the color: ";
+            cin >> color;
+            cout << "Enter the quantity: ";
+            cin >> quantity;
+            if (quantity <= cloth.stock) {
+                // Create a copy of the cloth with updated details
+                Clothing clothInCart = cloth;
+                clothInCart.size = size;
+                clothInCart.clothMaterial = material;
+                clothInCart.color = color;
+                // Update the cart
+                cart[clothID] = make_pair(clothInCart, quantity);
+                CartNode* newNode = new CartNode(clothInCart, quantity);
+                newNode->next = cartHead;
+                cartHead = newNode;
+                cout << "Item added to cart successfully.\n";
+            }
+            else {
+                cout << "Insufficient stock. Unable to add to cart.\n";
+            }
+        }
+        else {
+            cout << "Item with ID " << clothID << " not found.\n";
+        }
+    }
+    void addToCartf() {
+        string clothID;
+        int quantity;
+
+        cout << "Enter the Cloth ID to add to cart: ";
+        cin >> clothID;
+
+        Clothing cloth;
+        if (clothingStoreHashMapFemale.find(clothID, cloth)) {
+            // Ask for additional details
+            string size, material, color;
+            cout << "Enter the size: ";
+            cin >> size;
+            cout << "Enter the material: ";
+            cin >> material;
+            cout << "Enter the color: ";
+            cin >> color;
+
+            cout << "Enter the quantity: ";
+            cin >> quantity;
+
+            if (quantity <= cloth.stock) {
+                // Create a copy of the cloth with updated details
+                Clothing clothInCart = cloth;
+                clothInCart.size = size;
+                clothInCart.clothMaterial = material;
+                clothInCart.color = color;
+
+                // Update the cart
+
+                cart[clothID] = make_pair(clothInCart, quantity);
+                CartNode* newNode = new CartNode(clothInCart, quantity);
+                newNode->next = cartHead;
+                cartHead = newNode;
+                cout << "Item added to cart successfully.\n";
+            }
+            else {
+                cout << "Insufficient stock. Unable to add to cart.\n";
+            }
+        }
+        else {
+            cout << "Item with ID " << clothID << " not found.\n";
+        }
+    }
+    void addToCartc() {
+        string clothID;
+        int quantity;
+
+        cout << "Enter the Cloth ID to add to cart: ";
+        cin >> clothID;
+
+        Clothing cloth;
+        if (clothingStoreHashMapChildrens.find(clothID, cloth)) {
+            // Ask for additional details
+            string size, material, color;
+            cout << "Enter the size: ";
+            cin >> size;
+            cout << "Enter the material: ";
+            cin >> material;
+            cout << "Enter the color: ";
+            cin >> color;
+
+            cout << "Enter the quantity: ";
+            cin >> quantity;
+
+            if (quantity <= cloth.stock) {
+                // Create a copy of the cloth with updated details
+                Clothing clothInCart = cloth;
+                clothInCart.size = size;
+                clothInCart.clothMaterial = material;
+                clothInCart.color = color;
+
+                // Update the cart
+                cart[clothID] = make_pair(clothInCart, quantity);
+                CartNode* newNode = new CartNode(clothInCart, quantity);
+                newNode->next = cartHead;
+                cartHead = newNode;
+
+                cout << "Item added to cart successfully.\n";
+            }
+            else {
+                cout << "Insufficient stock. Unable to add to cart.\n";
+            }
+        }
+        else {
+            cout << "Item with ID " << clothID << " not found.\n";
+        }
+    }
+    void removeFromCart() {
+        string clothID;
+
+        cout << "Enter the Cloth ID to remove from cart: ";
+        cin >> clothID;
+        CartNode* current = cartHead;
+        CartNode* prev = nullptr;
+
+        while (current != nullptr) {
+            if (current->item.clothID == clothID) {
+                if (prev != nullptr) {
+                    prev->next = current->next;
+                }
+                else {
+                    cartHead = current->next;
+                }
+
+                delete current;
+                cout << "Item removed from cart successfully.\n";
+                return;
+            }
+            prev = current;
+            current = current->next;
+        }
+
+        cout << "Item with ID " << clothID << " not found in the cart.\n";
+    }
+
+    void viewCart()
+    {
+        totalBill = 0;
+        cout << "Cart contents:\n";
+        cout << "| Cloth ID   |   Cloth Type   |    Price    |    Quantity  |        Material       |       Color         |       Size           |" << endl;
+        cout << "|------------|----------------|-------------|--------------|-----------------------|---------------------|----------------------|" << endl;
+        CartNode* current = cartHead;
+        while (current != nullptr)
+        {
+            const Clothing& cloth = current->item;
+            int quantity = current->quantity;
+
+            cout << "| " << setw(8) << left << cloth.clothID
+                << "   | " << setw(15) << left << cloth.clothType
+                << "| " << setw(6) << right << fixed << setprecision(2) << cloth.price
+                << "      | " << setw(5) << right << quantity
+                << "        | " << setw(21) << left << cloth.clothMaterial
+                << " | " << setw(19) << left << cloth.color
+                << " | " << setw(21) << left << cloth.size << "|" << endl;
+            totalBill += cloth.price * quantity;
+
+            current = current->next;
+        }
+        cout << "Total Bill: " << totalBill << endl;
+    }
+    double getTotalBill() const {
+        return totalBill;
+    }
+    void checkout(HashMap& clothingStore, HashMap& clothingStoreFemale, HashMap& clothingStoreChildrens)
+    {
+        CartNode* current = cartHead;
+        while (current != nullptr)
+        {
+            const Clothing& cloth = current->item;
+            int quantity = current->quantity;
+            if (clothingStore.find(cloth.clothID, const_cast<Clothing&>(cloth)))
+            {
+                int newStock = cloth.stock - quantity;
+                Clothing updatedCloth = cloth;
+                updatedCloth.stock = newStock;
+                clothingStore.remove(cloth.clothID);
+                clothingStore.insert(cloth.clothID, updatedCloth);
+                updateFile();
+            }
+            // Update stock in the file for female clothing store
+            if (clothingStoreFemale.find(cloth.clothID, const_cast<Clothing&>(cloth))) {
+                int newStock = cloth.stock - quantity;
+                Clothing updatedCloth = cloth;
+                updatedCloth.stock = newStock;
+                clothingStoreFemale.remove(cloth.clothID);
+                clothingStoreFemale.insert(cloth.clothID, updatedCloth);
+                updateFilefemale();
+            }
+            // Update stock in the file for children's clothing store
+            if (clothingStoreChildrens.find(cloth.clothID, const_cast<Clothing&>(cloth))) {
+                int newStock = cloth.stock - quantity;
+                Clothing updatedCloth = cloth;
+                updatedCloth.stock = newStock;
+                clothingStoreChildrens.remove(cloth.clothID);
+                clothingStoreChildrens.insert(cloth.clothID, updatedCloth);
+                updateFileChildrens();
+            }
+            else {
+                cout << "Item with ID " << cloth.clothID << "\n";
+            }
+            CartNode* temp = current;
+            current = current->next;
+            delete temp;
+        }
+
+        cartHead = nullptr;  // Clear the cart
+        cout << "Checkout successful. Stock updated in all stores.\n";
+    }
+
+};
+
+void readFromFile()
+{
+    ifstream inFile("clothingStore.txt", ios::in);
+    if (!inFile.is_open())
+    {
+        cerr << "Error opening the file clothingStore.txt" << endl;
+        return;
+    }
+    Clothing newItem;
+    while (inFile >> newItem.clothID
+        >> newItem.clothType
+        >> newItem.clothMaterial
+        >> newItem.color
+        >> newItem.size
+        >> newItem.price
+        >> newItem.stock) {
+        clothingStoreHashMap.insert(newItem.clothID, newItem);
+    }
+    inFile.close();
+}
+void readFromFilefemale()
+{
+    ifstream inFile("female.txt", ios::in);
+    if (!inFile.is_open()) {
+        cerr << "Error opening the file female.txt" << endl;
+        return;
+    }
+    Clothing newItem;
+    while (inFile >> newItem.clothID
+        >> newItem.clothType
+        >> newItem.clothMaterial
+        >> newItem.color
+        >> newItem.size
+        >> newItem.price
+        >> newItem.stock) {
+        clothingStoreHashMapFemale.insert(newItem.clothID, newItem);
+    }
+    inFile.close();
+}
+void readFromFileChildrens() {
+    ifstream inFile("children.txt", ios::in);
+
+    if (!inFile.is_open())
+    {
+        cerr << "Error opening the file children.txt" << endl;
+        return;
+    }
+    Clothing newItem;
+    while (inFile >> newItem.clothID
+        >> newItem.clothType
+        >> newItem.clothMaterial
+        >> newItem.color
+        >> newItem.size
+        >> newItem.price
+        >> newItem.stock) {
+        clothingStoreHashMapChildrens.insert(newItem.clothID, newItem);
+    }
+
+    inFile.close();
+}
+void displayClothingStorec() {
+    for (int i = 0; i < TABLE_SIZE; ++i) {
+        Node* current = clothingStoreHashMapChildrens.table[i];
+        while (current != nullptr) {
+            Node* temp = current;
+            current = current->next;
+            delete temp;
+        }
+        clothingStoreHashMapChildrens.table[i] = nullptr;
+    }
+
+    // Read data from file again
+    readFromFileChildrens();
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    // Display header
+    cout << "=================================================================================================================================" << endl;
+    SetConsoleTextAttribute(h, 14);
+    cout << "                     -------------------------------- CLOTHING STORE--------------------------------" << endl;
+    cout << "|===============================================================================================================================|" << endl;
+
+    // Display table header
+    SetConsoleTextAttribute(h, 3);
+    cout << "| Cloth ID   |   Cloth Type   |    Price    |    Stock     |        Material       |       Color         |       Size           |" << endl;
+    cout << "|------------|----------------|-------------|--------------|-----------------------|---------------------|----------------------|" << endl;
+
+    // Display table content
+    SetConsoleTextAttribute(h, 2);
+
+    for (int i = 0; i < TABLE_SIZE; ++i) {
+        Node* current = clothingStoreHashMapChildrens.table[i];
+        while (current != nullptr) {
+            const Clothing& cloth = current->value;
+            cout << "| " << setw(8) << left << cloth.clothID
+                << "   | " << setw(15) << left << cloth.clothType
+                << "| " << setw(6) << right << fixed << setprecision(2) << cloth.price
+                << "      | " << setw(5) << right << cloth.stock
+                << "        | " << setw(21) << left << cloth.clothMaterial
+                << " | " << setw(19) << left << cloth.color
+                << " | " << setw(21) << left << cloth.size << "|" << endl;
+            current = current->next;
+        }
+    }
+
+    // Display footer
+    SetConsoleTextAttribute(h, 3);
+    cout << "|===============================================================================================================================|" << endl;
+    SetConsoleTextAttribute(h, 14);
+    cout << "=================================================================================================================================" << endl;
+}
+void displayClothingStoref() {
+    for (int i = 0; i < TABLE_SIZE; ++i) {
+        Node* current = clothingStoreHashMapFemale.table[i];
+        while (current != nullptr) {
+            Node* temp = current;
+            current = current->next;
+            delete temp;
+        }
+        clothingStoreHashMapFemale.table[i] = nullptr;
+    }
+
+    // Read data from file again
+    readFromFilefemale();
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    // Display header
+    cout << "=================================================================================================================================" << endl;
+    SetConsoleTextAttribute(h, 14);
+    cout << "                     -------------------------------- CLOTHING STORE--------------------------------" << endl;
+    cout << "|===============================================================================================================================|" << endl;
+
+    // Display table header
+    SetConsoleTextAttribute(h, 3);
+    cout << "| Cloth ID   |   Cloth Type   |    Price    |    Stock     |        Material       |       Color         |       Size           |" << endl;
+    cout << "|------------|----------------|-------------|--------------|-----------------------|---------------------|----------------------|" << endl;
+
+    // Display table content
+    SetConsoleTextAttribute(h, 2);
+
+    for (int i = 0; i < TABLE_SIZE; ++i) {
+        Node* current = clothingStoreHashMapFemale.table[i];
+        while (current != nullptr) {
+            const Clothing& cloth = current->value;
+            cout << "| " << setw(8) << left << cloth.clothID
+                << "   | " << setw(15) << left << cloth.clothType
+                << "| " << setw(6) << right << fixed << setprecision(2) << cloth.price
+                << "      | " << setw(5) << right << cloth.stock
+                << "        | " << setw(21) << left << cloth.clothMaterial
+                << " | " << setw(19) << left << cloth.color
+                << " | " << setw(21) << left << cloth.size << "|" << endl;
+            current = current->next;
+        }
+    }
+
+    // Display footer
+    SetConsoleTextAttribute(h, 3);
+    cout << "|===============================================================================================================================|" << endl;
+    SetConsoleTextAttribute(h, 14);
+    cout << "=================================================================================================================================" << endl;
+}
+
+void displayClothingStore() {
+    for (int i = 0; i < TABLE_SIZE; ++i) {
+        Node* current = clothingStoreHashMap.table[i];
+        while (current != nullptr) {
+            Node* temp = current;
+            current = current->next;
+            delete temp;
+        }
+        clothingStoreHashMap.table[i] = nullptr;
+    }
+
+    // Read data from file again
+    readFromFile();
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    // Display header
+    cout << "=================================================================================================================================" << endl;
+    SetConsoleTextAttribute(h, 14);
+    cout << "                     -------------------------------- CLOTHING STORE--------------------------------" << endl;
+    cout << "|===============================================================================================================================|" << endl;
+
+    // Display table header
+    SetConsoleTextAttribute(h, 3);
+    cout << "| Cloth ID   |   Cloth Type   |    Price    |    Stock     |        Material       |       Color         |       Size           |" << endl;
+    cout << "|------------|----------------|-------------|--------------|-----------------------|---------------------|----------------------|" << endl;
+
+    // Display table content
+    SetConsoleTextAttribute(h, 2);
+    for (int i = 0; i < TABLE_SIZE; ++i) {
+        Node* current = clothingStoreHashMap.table[i];
+        while (current != nullptr) {
+            const Clothing& cloth = current->value;
+            cout << "| " << setw(8) << left << cloth.clothID
+                << "   | " << setw(15) << left << cloth.clothType
+                << "| " << setw(6) << right << fixed << setprecision(2) << cloth.price
+                << "      | " << setw(5) << right << cloth.stock
+                << "        | " << setw(21) << left << cloth.clothMaterial
+                << " | " << setw(19) << left << cloth.color
+                << " | " << setw(21) << left << cloth.size << "|" << endl;
+            current = current->next;
+        }
+    }
+    // Display footer
+    SetConsoleTextAttribute(h, 3);
+    cout << "|===============================================================================================================================|" << endl;
+    SetConsoleTextAttribute(h, 14);
+    cout << "=================================================================================================================================" << endl;
+}
+void setConsoleColor(int color) {
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
+}
+
+
+void addItem() {
+    Clothing newItem;
+
+    cout << "Enter details for the new item:\n";
+    cout << "Enter unique Cloth ID: ";
+    cin >> newItem.clothID;
+
+    // Check if the ID already exists
+    while (clothingStoreHashMap.find(newItem.clothID, newItem) || clothingStoreHashMapFemale.find(newItem.clothID, newItem) || clothingStoreHashMapChildrens.find(newItem.clothID, newItem)) {
+        cout << "Item with ID " << newItem.clothID << " already exists. Enter a unique ID: ";
+        cin >> newItem.clothID;
+    }
+
+    cout << "Cloth Type: ";
+    cin >> newItem.clothType;
+    cout << "Material: ";
+    cin >> newItem.clothMaterial;
+    cout << "Color: ";
+    cin >> newItem.color;
+    cout << "Size: ";
+    cin >> newItem.size;
+    cout << "Price: ";
+    cin >> newItem.price;
+    cout << "Stock: ";
+    cin >> newItem.stock;
+
+    clothingStoreHashMap.insert(newItem.clothID, newItem);
+
+    cout << "Item added successfully with ID: " << newItem.clothID << "\n";
+}
+void addItemFemale() {
+    Clothing newItem;
+
+    cout << "Enter details for the new item:\n";
+    cout << "Enter unique Cloth ID: ";
+    cin >> newItem.clothID;
+
+    // Check if the ID already exists
+    while (clothingStoreHashMap.find(newItem.clothID, newItem) || clothingStoreHashMapFemale.find(newItem.clothID, newItem) || clothingStoreHashMapChildrens.find(newItem.clothID, newItem)) {
+        cout << "Item with ID " << newItem.clothID << " already exists. Enter a unique ID: ";
+        cin >> newItem.clothID;
+    }
+
+    cout << "Cloth Type: ";
+    cin >> newItem.clothType;
+    cout << "Material: ";
+    cin >> newItem.clothMaterial;
+    cout << "Color: ";
+    cin >> newItem.color;
+    cout << "Size: ";
+    cin >> newItem.size;
+    cout << "Price: ";
+    cin >> newItem.price;
+    cout << "Stock: ";
+    cin >> newItem.stock;
+
+    clothingStoreHashMapFemale.insert(newItem.clothID, newItem);
+
+    cout << "Item added successfully with ID: " << newItem.clothID << "\n";
+}
+void addItemChildrens() {
+    Clothing newItem;
+
+    cout << "Enter details for the new item:\n";
+    cout << "Enter unique Cloth ID: ";
+    cin >> newItem.clothID;
+
+    // Check if the ID already exists
+    while (clothingStoreHashMap.find(newItem.clothID, newItem) || clothingStoreHashMapFemale.find(newItem.clothID, newItem) || clothingStoreHashMapChildrens.find(newItem.clothID, newItem)) {
+        cout << "Item with ID " << newItem.clothID << " already exists. Enter a unique ID: ";
+        cin >> newItem.clothID;
+    }
+    cout << "Cloth Type: ";
+    cin >> newItem.clothType;
+    cout << "Material: ";
+    cin >> newItem.clothMaterial;
+    cout << "Color: ";
+    cin >> newItem.color;
+    cout << "Size: ";
+    cin >> newItem.size;
+    cout << "Price: ";
+    cin >> newItem.price;
+    cout << "Stock: ";
+    cin >> newItem.stock;
+    clothingStoreHashMapChildrens.insert(newItem.clothID, newItem);
+    cout << "Item added successfully with ID: " << newItem.clothID << "\n";
+}
+
+void removeItem() {
+    string clothID;
+
+    cout << "Enter the Cloth ID to remove: ";
+    cin >> clothID;
+
+    if (clothingStoreHashMap.remove(clothID)) {
+        cout << "Item with ID " << clothID << " removed successfully.\n";
+    }
+    else {
+        cout << "Item with ID " << clothID << " not found.\n";
+    }
+}
+
+void removeItemfemale() {
+    string clothID;
+
+    cout << "Enter the Cloth ID to remove: ";
+    cin >> clothID;
+
+    if (clothingStoreHashMapFemale.remove(clothID)) {
+        cout << "Item with ID " << clothID << " removed successfully.\n";
+    }
+    else {
+        cout << "Item with ID " << clothID << " not found.\n";
+    }
+}
+
+void removeItemChildrens() {
+    string clothID;
+
+    cout << "Enter the Cloth ID to remove: ";
+    cin >> clothID;
+
+    if (clothingStoreHashMapChildrens.remove(clothID)) {
+        cout << "Item with ID " << clothID << " removed successfully.\n";
+    }
+    else {
+        cout << "Item with ID " << clothID << " not found.\n";
+    }
+}
+void updateStock() {
+    string clothID;
+    int newStock;
+
+    cout << "Enter the Cloth ID to update stock: ";
+    cin >> clothID;
+
+    Clothing cloth;
+    if (clothingStoreHashMap.find(clothID, cloth)) {
+        cout << "Enter the new stock for " << clothID << ": ";
+        cin >> newStock;
+        cloth.stock = newStock;
+        clothingStoreHashMap.remove(clothID);  // Remove the old entry
+        clothingStoreHashMap.insert(clothID, cloth);  // Insert the updated entry
+        cout << "Stock updated successfully for item with ID " << clothID << ".\n";
+    }
+    else {
+        cout << "Item with ID " << clothID << " not found.\n";
+    }
+}
+void updateStockFemale() {
+    string clothID;
+    int newStock;
+
+    cout << "Enter the Cloth ID to update stock: ";
+    cin >> clothID;
+
+    Clothing cloth;
+    if (clothingStoreHashMapFemale.find(clothID, cloth)) {
+        cout << "Enter the new stock for " << clothID << ": ";
+        cin >> newStock;
+        cloth.stock = newStock;
+        clothingStoreHashMapFemale.remove(clothID);  // Remove the old entry
+        clothingStoreHashMapFemale.insert(clothID, cloth);  // Insert the updated entry
+        cout << "Stock updated successfully for item with ID " << clothID << ".\n";
+    }
+    else {
+        cout << "Item with ID " << clothID << " not found.\n";
+    }
+}
+void updateStockChildrens()
+{
+    string clothID;
+    int newStock;
+
+    cout << "Enter the Cloth ID to update stock: ";
+    cin >> clothID;
+
+    Clothing cloth;
+    if (clothingStoreHashMapChildrens.find(clothID, cloth)) {
+        cout << "Enter the new stock for " << clothID << ": ";
+        cin >> newStock;
+        cloth.stock = newStock;
+        clothingStoreHashMapChildrens.remove(clothID);  // Remove the old entry
+        clothingStoreHashMapChildrens.insert(clothID, cloth);  // Insert the updated entry
+        cout << "Stock updated successfully for item with ID " << clothID << ".\n";
+    }
+    else {
+        cout << "Item with ID " << clothID << " not found.\n";
+    }
+}
+void updateFile() {
+    ofstream outFile("clothingStore.txt", ios::out | ios::trunc);
+    if (!outFile.is_open()) {
+        cerr << "Error opening the file clothingStore.txt for writing" << endl;
+        return;
+    }
+    for (int i = 0; i < TABLE_SIZE; ++i) {
+        Node* current = clothingStoreHashMap.table[i];
+        while (current != nullptr) {
+            const Clothing& cloth = current->value;
+            outFile << cloth.clothID << " "
+                << cloth.clothType << " "
+                << cloth.clothMaterial << " "
+                << cloth.color << " "
+                << cloth.size << " "
+                << cloth.price << " "
+                << cloth.stock << endl;
+            current = current->next;
+        }
+    }
+
+    outFile.close();
+}
+void updateFilefemale() {
+    ofstream outFile("female.txt", ios::out | ios::trunc);
+    if (!outFile.is_open()) {
+        cerr << "Error opening the file female.txt for writing" << endl;
+        return;
+    }
+    for (int i = 0; i < TABLE_SIZE; ++i) {
+        Node* current = clothingStoreHashMapFemale.table[i];
+        while (current != nullptr) {
+            const Clothing& cloth = current->value;
+            outFile << cloth.clothID << " "
+                << cloth.clothType << " "
+                << cloth.clothMaterial << " "
+                << cloth.color << " "
+                << cloth.size << " "
+                << cloth.price << " "
+                << cloth.stock << endl;
+            current = current->next;
+        }
+    }
+
+    outFile.close();
+}
+void updateFileChildrens() {
+    ofstream outFile("children.txt", ios::out | ios::trunc);
+    if (!outFile.is_open()) {
+        cerr << "Error opening the file children.txt for writing" << endl;
+        return;
+    }
+    for (int i = 0; i < TABLE_SIZE; ++i) {
+        Node* current = clothingStoreHashMapChildrens.table[i];
+        while (current != nullptr) {
+            const Clothing& cloth = current->value;
+            outFile << cloth.clothID << " "
+                << cloth.clothType << " "
+                << cloth.clothMaterial << " "
+                << cloth.color << " "
+                << cloth.size << " "
+                << cloth.price << " "
+                << cloth.stock << endl;
+            current = current->next;
+        }
+    }
+
+    outFile.close();
+}
+
+void signup() {
+    string suser, spass;
+    system("cls");
+    cout << "SIGNUP SYSTEM: " << endl;
+    cout << "\n\t\t\tEnter Username: ";
+    cin >> suser;
+    cout << "\n\t\t\tEnter Password: ";
+    cin >> spass;
+
+    ofstream reg("admin.txt", ios::app);
+    reg << suser << ' ' << spass << endl;
+
+    system("cls");
+    cout << "\n\tRegisteration successful!\n";
+}
+
+int login() {
+    int c = 1;
+    int exist = 0;
+    string user, pass, u, p;
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+    system("cls");
+    SetConsoleTextAttribute(h, 11);
+    cout << "\n\t\t---------------------------" << endl;
+    SetConsoleTextAttribute(h, 1);
+    cout << "\t\tEnter Username: ";
+    SetConsoleTextAttribute(h, 11);
+    cout << "\n\t\t---------------------------" << endl;
+    cin >> user;
+    cout << "\n\t\t---------------------------" << endl;
+    SetConsoleTextAttribute(h, 1);
+    cout << "\t\tEnter Password: ";
+    SetConsoleTextAttribute(h, 11);
+    cout << "\n\t\t---------------------------" << endl;
+    cin >> pass;
+
+    ifstream input("admin.txt");
+
+    while (input >> u >> p) {
+        if (u == user && p == pass) {
+            exist = 1;
+        }
+    }
+    input.close();
+
+    if (exist == 1) {
+        system("cls");
+        c = 0;
+        SetConsoleTextAttribute(h, 5);
+        cout << "\t\t\t\t\t===============================================" << endl;
+        SetConsoleTextAttribute(h, 11);
+        cout << "\n\t\t\t\t\t=================Welcome " << user << "=================" << endl;
+        SetConsoleTextAttribute(h, 5);
+        cout << "\n\t\t\t\t\t===============================================" << endl;
+    }
+    else if (exist == 0) {
+        SetConsoleTextAttribute(h, 12);
+        cout << "\n\t\t\tInvalid Credentials!!!\n\n";
+        login();
+    }
+    return c;
+}
+void displayCenteredMenu() {
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    // Get the console window size
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(h, &csbi);
+    int consoleWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    int consoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+
+    // Calculate the position to center the menu
+    int centerX = consoleWidth / 2 - 15; // Assuming the menu width is 30 characters
+
+    // Set the cursor position
+    COORD coord;
+    coord.X = centerX;
+    coord.Y = consoleHeight / 2 - 5; // Assuming the menu height is 10 lines
+    SetConsoleCursorPosition(h, coord);
+
+    // Print the menu
+
+    SetConsoleTextAttribute(h, 3);
+    cout << "==================================" << endl;
+    cout << "                                             " << "Welcome to the Clothing Store!\n";
+    cout << "                                             " << "==================================";
+    cout << endl;
+    SetConsoleTextAttribute(h, 3);
+    cout << "                                              " "1. Admin\n";
+    SetConsoleTextAttribute(h, 9);
+    cout << "                                              " "2. Customer\n";
+    SetConsoleTextAttribute(h, 14);
+    cout << "                                              " "3. Exit\n";
+    SetConsoleTextAttribute(h, 11);
+    cout << "                                              " "Enter your choice (1-3): ";
+}
+void displayCenteredMenu2() {
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    // Get the console window size
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(h, &csbi);
+    int consoleWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    int consoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+
+    // Calculate the position to center the admin panel
+    int centerX = consoleWidth / 2 - 20; // Assuming the admin panel width is 40 characters
+
+    // Set the cursor position
+    COORD coord;
+    coord.X = centerX;
+    coord.Y = consoleHeight / 2 - 5; // Assuming the admin panel height is 10 lines
+    SetConsoleCursorPosition(h, coord);
+
+    // Print the admin panel menu
+    SetConsoleTextAttribute(h, 3);
+    std::cout << "===========Admin Panel===========\n" << endl;
+    SetConsoleTextAttribute(h, 11);
+    cout << "                                                          "  "Press 1 for Login\n";
+    cout << "                                                          "  "Press 2 for Signup\n";
+    cout << "                                                          "  "Press 3 for Exit\n";
+}
+void displayCenteredMenu3() {
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    // Get the console window size
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(h, &csbi);
+    int consoleWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    int consoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+
+    // Calculate the position to center the admin panel
+    int centerX = consoleWidth / 2 - 20; // Assuming the admin panel width is 40 characters
+
+    // Set the cursor position
+    COORD coord;
+    coord.X = centerX;
+    coord.Y = consoleHeight / 2 - 5; // Assuming the admin panel height is 10 lines
+    SetConsoleCursorPosition(h, coord);
+    // Print the menu
+    SetConsoleTextAttribute(h, 9);
+    cout << "==================Customer Menu==================" << endl;
+    SetConsoleTextAttribute(h, 14);
+    cout << "                                                          " "1. Add to Cart" << endl;
+    cout << "                                                          " "2. Remove from Cart" << endl;
+    cout << "                                                          " "3. View Cart" << endl;
+    cout << "                                                          " "4. Checkout" << endl;
+    cout << "                                                          " "5. Display Store" << endl;
+    cout << "                                                          " "6. Logout" << endl;
+    SetConsoleTextAttribute(h, 4);
+    cout << "                                                          " "Enter your choice (1-5): ";
+}
+int ShoppingCart::orderCounter = 0;
+int main() {
+    readFromFile();
+    readFromFilefemale();
+    readFromFileChildrens();
+
+    // main function logic remains the same
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    char userType;
+    int loginStatus = 0;
+    char choice1;
+    ShoppingCart customerCart;
+    do {
+        system("cls");
+        system("cls");
+        displayCenteredMenu();
+        cin >> userType;
+        switch (userType) {
+        case '1':
+            system("cls");
+            do {
+                SetConsoleTextAttribute(h, 3);
+                displayCenteredMenu2();
+                SetConsoleTextAttribute(h, 11);
+                cin >> choice1;
+                if (choice1 == '1') {
+                    system("cls");
+                    loginStatus == login();
+                    if (loginStatus == 0) {
+                        char choice;
+                        do {
+                            SetConsoleTextAttribute(h, 9);
+                            cout << "\n=======Clothing Store Management=======\n";
+                            SetConsoleTextAttribute(h, 14);
+                            cout << "1. Add Item \n";
+                            cout << "2. Display Clothing Store\n";
+                            cout << "3. Remove Item\n";
+                            cout << "4. Update Stock\n";
+                            cout << "5. Update File\n";
+                            cout << "6. Display Sales record\n";
+                            cout << "7. Logout\n";
+                            SetConsoleTextAttribute(h, 4);
+                            cout << "Enter your choice (1-7): ";
+                            cin >> choice;
+                            system("cls");
+                            switch (choice) {
+                            case '1':
+                                int select;
+                                system("cls");
+                                cout << "Press 1 for adding Male items " << endl;
+                                cout << "Press 2 for adding Female items " << endl;
+                                cout << "Press 3 for adding childrens items " << endl;
+                                cin >> select;
+                                system("cls");
+                                if (select == 1)
+
+                                {
+                                    displayClothingStore();
+                                    addItem();
+                                    updateFile();
+                                    system("cls");
+                                }
+                                if (select == 2)
+                                {
+                                    displayClothingStoref();
+                                    addItemFemale();
+                                    updateFilefemale();
+                                    system("cls");
+                                }
+                                if (select == 3)
+                                {
+                                    displayClothingStorec();
+                                    addItemChildrens();
+                                    updateFileChildrens();
+                                    system("cls");
+                                }
+                                break;
+                            case '2':
+                                int select2;
+                                system("cls");
+                                cout << "Press 1 for Displaying Male items " << endl;
+                                cout << "Press 2 for Displaying Female items " << endl;
+                                cout << "Press 3 for Displaying childrens items " << endl;
+                                cin >> select2;
+                                system("cls");
+                                if (select2 == 1)
+
+                                {
+                                    displayClothingStore();
+
+                                }
+                                if (select2 == 2)
+
+                                {
+                                    displayClothingStoref();
+
+                                }
+                                if (select2 == 3)
+
+                                {
+                                    displayClothingStorec();
+
+                                }
+                                break;
+                            case '3':
+                                int select3;
+                                system("cls");
+                                cout << "Press 1 for Removing Male items " << endl;
+                                cout << "Press 2 for Removing Female items " << endl;
+                                cout << "Press 3 for Removing childrens items " << endl;
+                                cin >> select3;
+                                system("cls");
+                                if (select3 == 1)
+
+                                {
+                                    displayClothingStore();
+                                    removeItem();
+                                    updateFile();
+                                    system("cls");
+                                }
+                                if (select3 == 2)
+
+                                {
+                                    displayClothingStoref();
+                                    removeItemfemale();
+                                    updateFilefemale();
+                                    system("cls");
+                                }
+                                if (select3 == 3)
+
+                                {
+                                    displayClothingStorec();
+                                    removeItemChildrens();
+                                    updateFileChildrens();
+                                    system("cls");
+                                }
+                                break;
+                            case '4':
+                                int select4;
+                                system("cls");
+                                cout << "Press 1 for Update Male stock " << endl;
+                                cout << "Press 2 for Update Female stock " << endl;
+                                cout << "Press 3 for Update childrens stock " << endl;
+                                cin >> select4;
+                                system("cls");
+                                if (select4 == 1)
+
+                                {
+                                    displayClothingStore();
+                                    updateStock();
+                                    updateFile();
+                                    system("cls");
+                                }
+                                if (select4 == 2)
+
+                                {
+                                    displayClothingStoref();
+                                    updateStockFemale();
+                                    updateFilefemale();
+                                    system("cls");
+                                }
+                                if (select4 == 3)
+
+                                {
+                                    displayClothingStorec();
+                                    updateStockChildrens();
+                                    updateFileChildrens();
+                                    system("cls");
+                                }
+                                break;
+                            case '5':
+                                updateFile();
+                                updateFilefemale();
+                                updateFileChildrens();
+
+                                system("cls");
+                                cout << "File updated successfully.\n";
+                                break;
+                            case '6':
+                                SetConsoleTextAttribute(h, 11);
+                                displayFileContents(filename);
+                                break;
+                            case '7':
+                                cout << "Logging out.\n";
+                                break;
+                            default:
+                                cout << "Invalid choice. Please enter a number between 1 and 6.\n";
+                            }
+                        } while (choice != '7');
+                        system("cls");
+                    }
+                }
+                else if (choice1 == '2') {
+                    signup();
+                }
+            } while (choice1 != '3');
+            break;
+        case '2':
+            system("cls");
+            do {
+                SetConsoleTextAttribute(h, 9);
+                cout << "==================Customer Menu==================" << endl;
+                SetConsoleTextAttribute(h, 14);
+                cout << "Customer Menu:\n";
+                cout << "1. Add to Cart\n";
+                cout << "2. Remove from Cart\n";
+                cout << "3. View Cart\n";
+                cout << "4. Checkout\n";
+                cout << "5. display store\n";
+                cout << "6. Logout\n";
+                SetConsoleTextAttribute(h, 4);
+                cout << "Enter your choice (1-6): ";
+                SetConsoleTextAttribute(h, 14);
+                cin >> choice1;
+                switch (choice1) {
+                case '1':
+                    int select5;
+                    system("cls");
+                    cout << "Press 1 for  Male Clothes " << endl;
+                    cout << "Press 2 for  Female Clothes " << endl;
+                    cout << "Press 3 for childrens Clothes " << endl;
+                    cin >> select5;
+                    system("cls");
+                    if (select5 == 1)
+                    {
+                        displayClothingStore();
+                        customerCart.addToCart();
+                        system("cls");
+                    }
+                    if (select5 == 2)
+                    {
+                        displayClothingStoref();
+                        customerCart.addToCartf();
+                        system("cls");
+                    }
+                    if (select5 == 3)
+                    {
+                        displayClothingStorec();
+                        customerCart.addToCartc();
+                        system("cls");
+                    }
+                    break;
+                case '2':
+                    system("cls");
+                    customerCart.removeFromCart();
+                    break;
+                case '3':
+                    system("cls");
+                    customerCart.viewCart();
+                    break;
+                case '4':
+                    system("cls");
+                    customerCart.updateSalesRecord();
+                    customerCart.checkout(clothingStoreHashMap, clothingStoreHashMapFemale, clothingStoreHashMapChildrens);
+                    break;
+                case '5':
+                    system("cls");
+                    displayClothingStore();
+                    displayClothingStorec();
+                    displayClothingStoref();
+                    break;
+                case '6':
+                    cout << "Logging out.\n";
+                    break;
+
+                default:
+                    cout << "Invalid choice. Please enter a number between 1 and 6.\n";
+                }
+            } while (choice1 != '6');
+            break;
+        case '3':
+            SetConsoleTextAttribute(h, 14);
+            cout << "Exiting the program.\n";
+            return 0;
+        default:
+            SetConsoleTextAttribute(h, 12);
+            cout << "Invalid choice. Please enter 1 for Admin, 2 for Customer, or 3 to Exit.\n";
+        }
+    } while (userType != '3');
+    return 0;
+}
